@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "causa",
+  "description": "Plugins related to the Causa framework and tooling.",
+  "owner": {
+    "name": "Causa",
+    "email": "contact@causa.io",
+    "url": "https://github.com/causa-io"
+  },
+  "plugins": [
+    {
+      "name": "causa-skills",
+      "source": "./",
+      "description": "Engineering skills for designing, implementing, documenting, and releasing features based on the Causa framework."
+    }
+  ]
+}
