@@ -1,0 +1,101 @@
+# yaml-language-server: $schema=https://json-schema.org/draft-07/schema
+
+title: MyEntity
+type: object
+description: |-
+  A description of my entity.
+additionalProperties: false
+properties:
+  id:
+    type: string
+    format: uuid
+    description: The unique ID for the entity.
+  createdAt:
+    type: string
+    format: date-time
+    description: The date at which the entity was created.
+  updatedAt:
+    type: string
+    format: date-time
+    description: The date at which the entity was last updated.
+  deletedAt:
+    oneOf:
+      - type: string
+        format: date-time
+      - type: "null"
+    description: The date at which the entity was deleted.
+  prop1:
+    type: integer
+    description: A first property.
+  nullableProp:
+    oneOf:
+      - type: string
+      - type: "null"
+    description: A property that can be null.
+  nestedProp:
+    oneOf:
+      - $ref: "#/$defs/SomeNestedInfo"
+    description: Some nested information.
+  nullableNestedProp:
+    oneOf:
+      - $ref: "#/$defs/SomeNestedInfo"
+      - type: "null"
+    description: Some nested information that can be null.
+  newPropertyAfterInitialRelease:
+    type: boolean
+    description: A new property added after the initial release of the entity.
+required:
+  - id
+  - createdAt
+  - updatedAt
+  - deletedAt
+  - prop1
+  - nullableProp
+  - nestedProp
+  - nullableNestedProp
+  # `newPropertyAfterInitialRelease` is not required, as it was added later. Otherwise, it would be a breaking change.
+
+$defs:
+  # Nested objects.
+  SomeNestedInfo:
+    type: object
+    description: Some additional information.
+    additionalProperties: false
+    properties:
+      prop1:
+        type: integer
+        description: A first property.
+      prop2:
+        type: string
+        description: A second property.
+    required:
+      - prop1
+      - prop2
+
+  # States.
+  MyEntityNotDeletedConstraint:
+    title: MyEntityNotDeletedConstraint
+    type: object
+    description: An entity that is not deleted.
+    additionalProperties: false
+    causa:
+      constraintFor: "#"
+    properties:
+      deletedAt:
+        type: "null"
+    required:
+      - deletedAt
+
+  MyEntityDeletedConstraint:
+    title: MyEntityDeletedConstraint
+    type: object
+    description: An entity that is deleted.
+    additionalProperties: false
+    causa:
+      constraintFor: "#"
+    properties:
+      deletedAt:
+        type: string
+        format: date-time
+    required:
+      - deletedAt

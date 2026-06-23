@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://json-schema.org/draft-07/schema
+
+title: OrderDocument
+type: object
+description: |-
+  An order placed by a user. This is a view of the Order entity for real-time frontend access.
+additionalProperties: false
+causa:
+  googleFirestoreCollection:
+    path: [users, property: user, orders, property: id]
+    hasSoftDelete: true
+properties:
+  id:
+    type: string
+    format: uuid
+    description: The unique ID for the order.
+  user:
+    type: string
+    description: The ID of the user who placed the order.
+  createdAt:
+    type: string
+    format: date-time
+    description: The date at which the order was created.
+  updatedAt:
+    type: string
+    format: date-time
+    description: The date at which the order was last updated.
+  deletedAt:
+    oneOf:
+      - type: string
+        format: date-time
+      - type: "null"
+    description: The date at which the order was deleted.
+  status:
+    type: string
+    description: The current status of the order.
+  totalAmount:
+    type: number
+    description: The total amount of the order.
+required:
+  - id
+  - user
+  - createdAt
+  - updatedAt
+  - deletedAt
+  - status
+  - totalAmount
