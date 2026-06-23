@@ -1,0 +1,37 @@
+openapi: 3.2.0
+info:
+  title: My entity API
+  description: The API to manage my entities.
+  version: 0.1.0
+
+x-causaResourceName: MyEntity
+
+paths:
+  /myEntities:
+    post:
+      summary: Creates a new my entity.
+      operationId: myEntityCreate
+      description: |-
+        Creates a new my entity.
+        This is only accessible to admins.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./dtos/my-entity-create.dto.yaml
+      responses:
+        "201":
+          description: The my entity was created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: ../entities/my-entity.yaml
+        "400":
+          description: The request was invalid.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: ../../common/api/dtos/validation-error.dto.yaml
+                  - $ref: ./dtos/business-error.dto.yaml

@@ -1,0 +1,112 @@
+# yaml-language-server: $schema=<path-to>/.causa/node_modules/@causa/workspace-core/dist/scenarios/schemas/scenario.yaml
+#
+# Example scenario. A user updates their profile via the HTTP API; the scenario then
+# asserts the change landed in Spanner, was logged by the service, and was published as
+# an event. It illustrates authentication, threading a value forward, and retrying on
+# asynchronously-produced results.
+#
+# Deliberately small and single-domain to focus on mechanics; a real scenario should span
+# several domains or features (see the skill's guidance on when a scenario is warranted).
+
+id: UpdateUserDescription
+description: A user patches their description, and the change propagates to state, logs, and events.
+
+inputs:
+  userId:
+    description: The ID of the user to update.
+    type: string
+    default: usr_123
+
+# Shared args merged under every HttpMakeRequest step. The token comes from a step below.
+defaultCallArgs:
+  HttpMakeRequest:
+    baseUrl: https://${ configuration('api.url') }
+    headers:
+      Authorization: Bearer ${ output('generateApiToken') }
+
+steps:
+  generateApiToken:
+    name: Generate API token
+    description: Authenticate as the user.
+    call:
+      name: GoogleIdentityPlatformGenerateToken
+      args:
+        user: ${ input('userId') }
+
+  getUserState:
+    name: Get user state
+    description: Read the current row to capture its updatedAt.
+    call:
+      name: DatabaseQueryRecords
+      args:
+        engine: google.spanner
+        database: backend
+        query: |-
+          SELECT * FROM User WHERE id = '${ input("userId") }' LIMIT 1
+    expectations:
+      - value: [id: "${ input('userId') }"]
+
+  patchUser:
+    name: Patch user
+    description: Update the user's description through the HTTP API.
+    call:
+      name: HttpMakeRequest
+      args:
+        method: PATCH
+        path: /users/${ input('userId') }
+        query:
+          updatedAt: ${ str(output('getUserState')[0].updatedAt) }
+        body:
+          description: My description ${ now }
+    expectations:
+      - actual: { $eval: "output('patchUser').statusCode" }
+        value: 200
+
+  getServiceLogs:
+    name: Get service logs
+    description: The service logged the completed request.
+    # This step's filter never references output('patchUser'), so the dependency is not detected automatically (unlike
+    # getUpdateEvent below, which is ordered for free by its output('patchUser') reference).
+    after: [patchUser]
+    call:
+      name: ServiceContainerQueryLogs
+      args:
+        service: some-service
+        filter: |-
+          jsonPayload.req.method="PATCH"
+          jsonPayload.req.params.path="users"
+          jsonPayload.req.params.path="${ input('userId') }"
+          jsonPayload.message="request completed"
+        limit: 1
+    retry:
+      maxAttempts: 15
+      delay: 1000
+    expectations:
+      - actual: { $eval: "output('getServiceLogs')[0].message.message" }
+        value:
+          actor:
+            id: ${ input('userId') }
+
+  getUpdateEvent:
+    name: Get update event
+    description: The userUpdated event carries the new description.
+    call:
+      name: EventTopicQueryEvents
+      args:
+        topic: some-topic.v1
+        filter: |-
+          STRING(data.data.id)="${ input('userId') }"
+          AND STRING(data.data.updatedAt)="${ output('patchUser').body.updatedAt }"
+        limit: 1
+    retry:
+      maxAttempts: 15
+      delay: 1000
+    expectations:
+      - actual: { $eval: "output('getUpdateEvent')[0]" }
+        value:
+          attributes:
+            eventName: userUpdated
+            actorId: ${ input('userId') }
+          data:
+            data:
+              description: ${ output('patchUser').body.description }

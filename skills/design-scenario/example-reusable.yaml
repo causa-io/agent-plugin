@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=<path-to>/.causa/node_modules/@causa/workspace-core/dist/scenarios/schemas/scenario.yaml
+#
+# Second example, illustrating the building blocks a larger cross-domain scenario relies on,
+# independent of any specific API:
+#   - invoking a reusable sub-scenario with `ScenarioRun` and reading its result;
+#   - cleaning up leftover state so the scenario can be re-run against a persistent environment;
+#   - generating a unique value with `rand('uuid')`, and setting auth per step.
+#
+# `path` values are workspace-root-relative. The referenced `scenarios/utils/*.yaml` file is
+# itself a small scenario invoked only through `ScenarioRun`, never run standalone.
+
+id: ReusableFlowExample
+description: Resolve an actor via a shared sub-scenario, then re-runnably create a resource.
+
+inputs:
+  actor:
+    description: Identifier passed to the reusable resolve sub-scenario.
+    type: string
+    default: actor-1
+  resourceId:
+    description: Key of the resource this scenario creates.
+    type: string
+    default: example-resource
+
+defaultCallArgs:
+  HttpMakeRequest:
+    baseUrl: https://${ configuration('api.url') }
+
+steps:
+  resolveActor:
+    name: Resolve actor and generate token
+    # A reusable sub-scenario. Its returned snapshot exposes each sub-step under
+    # `.steps.<id>.output` — here, a generated bearer token used by the steps below.
+    call:
+      name: ScenarioRun
+      args:
+        path: scenarios/utils/resolve-and-generate-token.yaml
+        inputs:
+          id: ${ input('actor') }
+
+  deleteExistingResource:
+    name: Delete leftover resource
+    # Re-runnability: remove a resource a previous run may have created. The status code is
+    # intentionally not asserted, so this is a harmless no-op (e.g. a 404) when none exists.
+    # No `after` needed — the Authorization reference already makes it depend on resolveActor.
+    call:
+      name: HttpMakeRequest
+      args:
+        method: DELETE
+        path: /resources/${ input('resourceId') }
+        headers:
+          Authorization: Bearer ${ output('resolveActor').steps.generateToken.output }
+
+  createResource:
+    name: Create resource
+    # `after` is required here: this must run once the cleanup is done, but nothing in its
+    # args references deleteExistingResource, so the ordering would not be detected otherwise.
+    after: [deleteExistingResource]
+    call:
+      name: HttpMakeRequest
+      args:
+        method: PUT
+        path: /resources/${ input('resourceId') }
+        headers:
+          Authorization: Bearer ${ output('resolveActor').steps.generateToken.output }
+        body:
+          requestId: ${ rand('uuid') }  # a fresh value on every run
+          name: Example resource
+    expectations: [value: { statusCode: 201 }]

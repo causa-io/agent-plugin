@@ -1,0 +1,112 @@
+# yaml-language-server: $schema=https://json-schema.org/draft-07/schema
+
+title: MyEntityEvent
+type: object
+description: An event describing a change to my entity.
+additionalProperties: false
+causa:
+  entityEvent: true
+properties:
+  id:
+    type: string
+    description: The UUID of the event.
+    format: uuid
+  producedAt:
+    type: string
+    description: The (business) date at which the event was produced.
+    format: date-time
+  name:
+    type: string
+    causa:
+      enumHint: "#/$defs/MyEntityEventName"
+    description: The name of the event.
+  data:
+    oneOf:
+      - $ref: ../../entities/my-entity.yaml
+    description: The entity.
+required:
+  - id
+  - producedAt
+  - name
+  - data
+
+$defs:
+  MyEntityEventName:
+    title: MyEntityEventName
+    type: string
+    enum:
+      - myEntityCreated
+      - myEntityUpdated
+      - myEntityDeleted
+    description: |-
+      The name of a my entity event.
+      - `myEntityCreated`: The entity was created.
+      - `myEntityUpdated`: The entity was updated.
+      - `myEntityDeleted`: The entity was deleted.
+
+  MyEntityCreatedEventConstraint:
+    title: MyEntityCreatedEventConstraint
+    type: object
+    description: An event indicating that a my entity was created.
+    additionalProperties: false
+    causa:
+      constraintFor: "#"
+      entityMutationFrom: [null]
+      entityPropertyChanges: "*"
+    properties:
+      name:
+        const: myEntityCreated
+      data:
+        oneOf:
+          - $ref: ../../entities/my-entity.yaml#/$defs/MyEntityNotDeletedConstraint
+    required:
+      - name
+      - data
+
+  MyEntityUpdatedEventConstraint:
+    title: MyEntityUpdatedEventConstraint
+    type: object
+    description: An event indicating that a my entity was updated.
+    additionalProperties: false
+    causa:
+      constraintFor: "#"
+      entityMutationFrom:
+        - ../../entities/my-entity.yaml#/$defs/MyEntityNotDeletedConstraint
+      entityPropertyChanges:
+        - updatedAt
+        - prop1
+        - nullableProp
+        - nestedProp
+        - nullableNestedProp
+        - newPropertyAfterInitialRelease
+    properties:
+      name:
+        const: myEntityUpdated
+      data:
+        oneOf:
+          - $ref: ../../entities/my-entity.yaml#/$defs/MyEntityNotDeletedConstraint
+    required:
+      - name
+      - data
+
+  MyEntityDeletedEventConstraint:
+    title: MyEntityDeletedEventConstraint
+    type: object
+    description: An event indicating that a my entity was deleted.
+    additionalProperties: false
+    causa:
+      constraintFor: "#"
+      entityMutationFrom:
+        - ../../entities/my-entity.yaml#/$defs/MyEntityNotDeletedConstraint
+      entityPropertyChanges:
+        - updatedAt
+        - deletedAt
+    properties:
+      name:
+        const: myEntityDeleted
+      data:
+        oneOf:
+          - $ref: ../../entities/my-entity.yaml#/$defs/MyEntityDeletedConstraint
+    required:
+      - name
+      - data
