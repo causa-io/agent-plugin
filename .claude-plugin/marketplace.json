@@ -9,7 +9,7 @@
   },
   "plugins": [
     {
-      "name": "causa-skills",
+      "name": "skills",
       "source": "./",
       "description": "Engineering skills for designing, implementing, documenting, and releasing features based on the Causa framework."
     }
