@@ -15,6 +15,7 @@ A Claude Code plugin providing engineering skills to design, implement, document
 | `plan-tests` | Plan contract and unit tests. |
 | `implement` | Write the code and tests from the plans. |
 | `design-scenario` | Author end-to-end test scenarios. |
+| `design-timeline` | Visualize events from several sources (service logs, event topics) on one time axis. |
 | `document` | Document the implemented feature. |
 | `bump-version` | Bump the service version and update the changelog. |
 
