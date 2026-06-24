@@ -98,6 +98,7 @@ What type of API is needed?>
 - [ ] Test planning (`plan-tests`)
 - [ ] Implementation (`implement`)
 - [ ] End-to-end scenarios (`design-scenario`, large/cross-domain features only)
+- [ ] Run timeline (`design-timeline`, optional companion to scenarios)
 - [ ] Documentation (`document`)
 
 <Mark items as N/A if not needed>
@@ -131,11 +132,12 @@ The standard order is:
 6. `plan-tests` - Plan tests for the feature
 7. `implement` - Implement the feature from the specifications in the work directory
 8. `design-scenario` - Design and write end-to-end scenarios (large or cross-domain features only)
-9. `document` - Document the implemented feature or bug fix
+9. `design-timeline` - Design a timeline to monitor the scenario's runs (optional companion to scenarios)
+10. `document` - Document the implemented feature or bug fix
 
 Not all skills are always needed. Skip skills that are not relevant to the current task.
 
-The design skills (steps 1-6) produce specifications in the work directory. `implement` (step 7) reads those specifications to write the code and tests. `design-scenario` (step 8) is only for large or cross-domain features that benefit from a realistic end-to-end test, skip it otherwise, and let the skill itself confirm whether a scenario is warranted. `document` (step 9) documents the result. Always confirm with the user before moving from design into implementation, as it is a significant, code-changing step.
+The design skills (steps 1-6) produce specifications in the work directory. `implement` (step 7) reads those specifications to write the code and tests. `design-scenario` (step 8) is only for large or cross-domain features that benefit from a realistic end-to-end test, skip it otherwise, and let the skill itself confirm whether a scenario is warranted. `design-timeline` (step 9) is an optional companion that visualizes a scenario's runs across its sources (service logs and event topics) on one time axis; like scenarios, it is mostly useful when the feature spans several entities or HTTP requests to several services, so skip it otherwise. `document` (step 10) documents the result. Always confirm with the user before moving from design into implementation, as it is a significant, code-changing step.
 
 ## 6. Conclude
 
@@ -240,6 +242,14 @@ Designs and writes end-to-end test scenarios (YAML files run against a developme
 - Skip for small or single-endpoint changes; the skill itself confirms whether a scenario is warranted
 
 Output: one or more scenario YAML files
+
+## design-timeline
+
+Designs a timeline (YAML file) that visualizes records from several sources (service logs and event topics) correlated on one time axis. Use when:
+- A companion to a scenario, to monitor its runs across the topics and services it exercises
+- Like scenarios, mostly useful when the feature spans several entities or HTTP requests to several services; skip otherwise, and let the skill confirm whether a timeline is warranted
+
+Output: one timeline YAML file per scenario
 
 ## document
 

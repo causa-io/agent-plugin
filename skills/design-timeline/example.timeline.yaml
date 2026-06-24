@@ -1,0 +1,121 @@
+# Example timeline. A debug/observe timeline that follows a single order across
+# three sources — the order service's request logs, the payment service's request
+# logs, and the order event topic — on one time axis. The `orderId` input scopes
+# every source to one order; leaving it empty widens the view to every order in
+# the window.
+#
+# To show the range of color conventions, each source colors by a different
+# dimension. A real timeline usually picks one consistent scheme — what matters
+# is that the dimension is orthogonal to the filter (see the SKILL conventions).
+
+name: Order activity
+description: |-
+  Follows a single order through its service requests and lifecycle events.
+
+  Shows:
+  - 📡 completed HTTP requests to `order-service`
+  - 💳 completed HTTP requests to `payment-service`
+  - 📦 order lifecycle events, with the order status
+
+  Colors vary per source for illustration (status range, fixed, event name); a real timeline picks one consistent scheme.
+
+# Inputs are referenced as `${ input('<name>') }`, but ONLY inside `filter`:
+# filters render once, before the query, against the inputs; `title`/`body`/
+# `color` render per record, against the record (no `input()` there). Inputs
+# suit observe/debug timelines. A timeline that monitors a scenario run is
+# usually static and declares no inputs.
+inputs:
+  orderId:
+    description: The order to follow. Leave empty to show every order.
+    type: string
+    default: ''
+
+sources:
+  # --- Service logs ---------------------------------------------------------
+  # `target` is the service container id. `filter` is a Cloud Logging filter
+  # (same syntax as the scenario `ServiceContainerQueryLogs` call). Each record
+  # is `{ timestamp, message }`, where `message` is the log payload; structured
+  # services nest the application object under `message.message` — inspect a real
+  # record, or mirror an existing timeline, to confirm the shape.
+  - id: orderRequests
+    name: Order request
+    type: serviceLogs
+    target: order-service
+    # `$if`/`then`/`else` builds the filter string. With no order, match every
+    # completed request; an empty result means "no filter" (all records).
+    filter:
+      $if: input('orderId') == ''
+      then: jsonPayload.message="request completed"
+      else: |-
+        jsonPayload.message="request completed"
+        jsonPayload.message.req.params.id="${ input('orderId') }"
+    # Color by status-code RANGE — orthogonal to the orderId filter (coloring by
+    # orderId would tint every record the same, which is useless). The returned
+    # label is hashed to a stable hue; equal labels share it. Read statusCode
+    # with `{ $eval: ... }` so it stays a number for the comparisons.
+    color:
+      $let:
+        status: { $eval: message.message.res.statusCode }
+      in:
+        $if: 'status >= 500'
+        then: 5xx
+        else:
+          $if: 'status >= 400'
+          then: 4xx
+          else: 2xx
+    # Title — one line, emoji-led, most salient facts first. No orderId here: the
+    # timeline already filters on it (it remains visible in the body anyway).
+    # `$let` would name sub-expressions when a title needs them; this one doesn't.
+    title: '📡 ${ message.message.res.statusCode } ${ message.message.req.method } ${ split(message.message.req.url, "?")[0] }'
+    # Body — for logs, declutter the payload: map the structured object and drop
+    # noisy framework keys. (For events, prefer the whole event — see below.)
+    body:
+      $map: { $eval: message.message }
+      'each(v, k)':
+        '${ k }':
+          $if: '!(k in ["level", "time", "message", "serviceContext"])'
+          then: { $eval: v }
+
+  # A second log source. With several similar lanes, a FIXED color per source is
+  # the clearest scheme — it identifies the lane regardless of record content. A
+  # `#rrggbb` result is used verbatim (only hex is; any other string is hashed).
+  - id: paymentRequests
+    name: Payment request
+    type: serviceLogs
+    target: payment-service
+    filter:
+      $if: input('orderId') == ''
+      then: jsonPayload.message="request completed"
+      else: |-
+        jsonPayload.message="request completed"
+        jsonPayload.message.orderId="${ input('orderId') }"
+    color: '#7c9cff'
+    title: '💳 ${ message.message.res.statusCode } ${ message.message.req.method } ${ split(message.message.req.url, "?")[0] }'
+    body:
+      $map: { $eval: message.message }
+      'each(v, k)':
+        '${ k }':
+          $if: '!(k in ["level", "time", "message", "serviceContext"])'
+          then: { $eval: v }
+
+  # --- Event topic ----------------------------------------------------------
+  # `target` is the event topic id. `filter` is a BigQuery WHERE expression over
+  # `data`/`attributes` (same syntax as the scenario `EventTopicQueryEvents`
+  # call). Each record is `{ timestamp, attributes, data }`: `attributes` holds
+  # the message attributes (e.g. `eventName`), and `data` is the event envelope
+  # (`id`, `producedAt`, `name`, `data`), so the entity payload is `data.data`.
+  - id: orderEvents
+    name: some-domain.order.v1
+    type: eventTopic
+    target: some-domain.order.v1
+    filter:
+      $if: input('orderId') == ''
+      then: ''
+      else: STRING(data.data.id)="${ input('orderId') }"
+    # Color by event name — the order's state transition — again orthogonal to
+    # the orderId filter, so each transition type gets its own hue.
+    color: ${ data.name }
+    title: '📦 ${ data.name } ⏺ ${ data.data.status }'
+    # Events are compact and self-describing — show the whole event as the body.
+    # Use the object form `{ $eval: ... }`: a bare `${ data }` throws on objects.
+    body: { $eval: data }
