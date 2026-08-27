@@ -146,7 +146,7 @@ Think of possible business errors that can occur for each operation and specify 
 Error responses usually include the following fields:
 
 - `statusCode` (integer): The HTTP status code. Description is `The HTTP status code of the error.`.
-- `errorCode` (string): An error identifier, in the format `domain.errorName`. Description is `The HTTP status code of the error.`.
+- `errorCode` (string): An error identifier, in the format `domain.errorName`. Description is `An error identifier, as a string.`.
 - `message` (string): A human-readable error message. Description is `A message describing the error.`.
 
 ### (HTTP) response code
