@@ -6,7 +6,7 @@ description: Bump the service version (including its active version) and update 
 1. Understand the feature or bug fix that was implemented, either from previous context or the changes on the current Git branch. Understand if the changes break backward compatibility. Ask for more context if needed.
 2. Ensure you are in the correct domain's service folder (usually `domains/<domain>/service`). Run all commands from there.
 3. Ensure there is no uncommitted code in the service you are working on. Uncommitted code outside the service does not matter. Otherwise, stop and ask for the uncommitted code to be committed first.
-4. Bump the service version using `npm version <newversion>`, where `<newversion>` is one of:
+4. Bump the service version using `npm version <newversion> --no-git-tag-version`, where `<newversion>` is one of:
    - `patch` for bug fixes and chores.
    - `minor` for new features without breaking changes.
    - `major` for new features with breaking changes, but only if the current version is `1.0.0` or higher. Otherwise, use `minor`.
