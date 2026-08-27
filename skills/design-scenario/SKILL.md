@@ -191,4 +191,4 @@ To assert **no rows / empty result**: `value: []` with `exact: true`, or `actual
 
 ## Monitoring runs with a timeline
 
-Once a scenario is written, a **timeline** can monitor its runs — visualizing the events and logs it produces across sources on one time axis. Use the `design-timeline` skill to write a timeline YAM file next to the scenario, querying the same event topics and service containers it exercises.
+Once a scenario is written, a **timeline** can monitor its runs — visualizing the events and logs it produces across sources on one time axis. Use the `design-timeline` skill to write a timeline YAML file next to the scenario, querying the same event topics and service containers it exercises.
