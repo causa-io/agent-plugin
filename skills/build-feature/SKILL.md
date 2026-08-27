@@ -171,87 +171,20 @@ Downstream skills will write their own output files to the same work directory.
 
 </validation>
 
-# Skills Reference
+# Skill outputs
 
-## design-model
+Each downstream skill writes its own artifact. After a skill completes, read its output
+and mark the matching item in the `requirements.md` checklist.
 
-Designs entity and event schemas (JSONSchema YAML files). Use when:
-- New business concepts need to be modeled
-- Existing entities need new properties or state transitions
-- New events need to be defined
-
-Output: `model-design.md`
-
-## design-api-http
-
-Designs HTTP APIs using OpenAPI and DTOs. Use when:
-- New HTTP API endpoints are needed
-- Existing endpoints need modification
-- New DTOs are required
-
-Output: `api-http-design.md`
-
-## design-api-firestore
-
-Designs Firestore collections and security rules. Use when:
-- Entities need to be exposed for real-time access by frontends
-- New Firestore collections are needed
-- Security rules need to be defined or updated
-
-Output: `api-firestore-design.md`
-
-## design-state
-
-Designs database schemas (Spanner DDL) and state objects. Use when:
-- New tables or columns are needed
-- New indexes are required for query patterns
-- Views on entities from other domains are needed
-
-Output: `state-design.md`
-
-## plan-implementation
-
-Plans services and controllers needed to implement the feature. Use when:
-- New services or controllers are needed
-- Existing services need new methods
-- Event handlers need to be added
-
-Output: `implementation-plan.md`
-
-## plan-tests
-
-Plans tests needed to cover the feature. Use when:
-- New test files are needed
-- Existing test files need new test cases
-- Contract-level tests (HTTP APIs, event handlers) are required
-
-Output: `test-plan.md`
-
-## implement
-
-Implements the feature or bug fix from the specifications in the work directory, writing the code and tests. Use when:
-- The design and planning skills have produced the specifications needed to write code
-- The user has confirmed the transition from design into implementation
-
-This is a significant, code-changing step. Always confirm with the user before invoking it.
-
-## design-scenario
-
-Designs and writes end-to-end test scenarios (YAML files run against a development environment). Use when:
-- The feature is large or cross-domain, and a realistic, multi-step end-to-end test adds value beyond the contract tests from `plan-tests`
-- Skip for small or single-endpoint changes; the skill itself confirms whether a scenario is warranted
-
-Output: one or more scenario YAML files
-
-## design-timeline
-
-Designs a timeline (YAML file) that visualizes records from several sources (service logs and event topics) correlated on one time axis. Use when:
-- A companion to a scenario, to monitor its runs across the topics and services it exercises
-- Like scenarios, mostly useful when the feature spans several entities or HTTP requests to several services; skip otherwise, and let the skill confirm whether a timeline is warranted
-
-Output: one timeline YAML file per scenario
-
-## document
-
-Documents the implemented feature, concept, or bug fix. Use when:
-- Implementation is complete and the change should be reflected in the documentation
+| Skill | Output |
+| --- | --- |
+| `design-model` | `model-design.md` |
+| `design-api-http` | `api-http-design.md` |
+| `design-api-firestore` | `api-firestore-design.md` |
+| `design-state` | `state-design.md` |
+| `plan-implementation` | `implementation-plan.md` |
+| `plan-tests` | `test-plan.md` |
+| `implement` | The code and tests themselves. No summary document. |
+| `design-scenario` | One scenario YAML file per scenario, outside the work directory. |
+| `design-timeline` | One timeline YAML file per scenario, next to the scenario. |
+| `document` | Entity and concept Markdown files in the domain. |
