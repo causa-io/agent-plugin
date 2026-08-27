@@ -11,7 +11,20 @@
     {
       "name": "skills",
       "source": "./",
-      "description": "Engineering skills for designing, implementing, documenting, and releasing features based on the Causa framework."
+      "description": "Engineering skills for designing, implementing, documenting, and releasing features based on the Causa framework.",
+      "category": "development",
+      "keywords": [
+        "causa",
+        "architecture",
+        "backend",
+        "typescript",
+        "nestjs",
+        "openapi",
+        "json-schema",
+        "spanner",
+        "firestore",
+        "documentation"
+      ]
     }
   ]
 }
