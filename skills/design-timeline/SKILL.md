@@ -83,7 +83,7 @@ Write one YAML file per timeline. Determine the directory timelines live in from
 
 ## Example timeline
 
-See [`example.timeline.yaml`](./example.timeline.yaml) in this skill directory for a complete, annotated example: a debug timeline that follows one order across two `serviceLogs` sources and one `eventTopic` source, illustrating the two template contexts, optional input-scoped filters, the three color conventions (status range, fixed per source, event name), emoji titles, and both body styles (whole event vs. decluttered log). Read it before writing a new timeline.
+See `${CLAUDE_SKILL_DIR}/example.timeline.yaml` for a complete, annotated example: a debug timeline that follows one order across two `serviceLogs` sources and one `eventTopic` source, illustrating the two template contexts, optional input-scoped filters, the three color conventions (status range, fixed per source, event name), emoji titles, and both body styles (whole event vs. decluttered log). Read it before writing a new timeline.
 
 ## How a timeline renders
 

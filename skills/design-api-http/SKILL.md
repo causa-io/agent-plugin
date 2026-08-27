@@ -76,8 +76,8 @@ The created entity.
 
 </example>
 
-3. Learn the global JSONSchema guidelines in `./jsonschema-guidelines.md`. Those should be used for DTOs.
-4. Read the example OpenAPI file in `./api-example.yaml`.
+3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`. Those should be used for DTOs.
+4. Read the example OpenAPI file in `${CLAUDE_SKILL_DIR}/api-example.yaml`.
 5. Write or update the HTTP API files and DTOs, following the guidelines below and existing files as reference.
 
 </instructions>
@@ -166,4 +166,4 @@ Follow these guidelines when choosing the response code for an error:
 
 ## Example
 
-Read `./api-example.yaml` for an example of an OpenAPI file. Read `./entity-example.yaml` for an example of a DTO file.
+Read `${CLAUDE_SKILL_DIR}/api-example.yaml` for an example of an OpenAPI file. Read `${CLAUDE_SKILL_DIR}/entity-example.yaml` for an example of a DTO file.

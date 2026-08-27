@@ -81,8 +81,8 @@ View of the `Order` entity with `internalNotes` redacted.
 
 </example>
 
-3. Learn the global JSONSchema guidelines in `./jsonschema-guidelines.md`.
-4. Read the example Firestore document schema in `./firestore-document-example.yaml`.
+3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
+4. Read the example Firestore document schema in `${CLAUDE_SKILL_DIR}/firestore-document-example.yaml`.
 5. Write or update the Firestore document schemas and security rules, following the guidelines below and existing files as reference.
 
 </instructions>
@@ -152,7 +152,7 @@ causa:
 
 ## Example
 
-Read `./firestore-document-example.yaml` for an example of a Firestore document schema.
+Read `${CLAUDE_SKILL_DIR}/firestore-document-example.yaml` for an example of a Firestore document schema.
 
 # Security rules
 

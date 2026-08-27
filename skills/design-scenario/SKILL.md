@@ -96,9 +96,9 @@ The `$schema` value is a path relative to the scenario file — adjust the numbe
 
 ## Example scenario
 
-See [`example.yaml`](./example.yaml) in this skill directory for a complete, annotated example: a user updates their profile via the HTTP API, then the scenario asserts the change landed in Spanner, was logged by the service, and was published as an event. It illustrates authentication, threading a value forward, and retrying on asynchronously-produced results. Read it before writing a new scenario.
+See `${CLAUDE_SKILL_DIR}/example.yaml` for a complete, annotated example: a user updates their profile via the HTTP API, then the scenario asserts the change landed in Spanner, was logged by the service, and was published as an event. It illustrates authentication, threading a value forward, and retrying on asynchronously-produced results. Read it before writing a new scenario.
 
-See [`example-reusable.yaml`](./example-reusable.yaml) for the `ScenarioRun`, cleanup, and `rand('uuid')` patterns.
+See `${CLAUDE_SKILL_DIR}/example-reusable.yaml` for the `ScenarioRun`, cleanup, and `rand('uuid')` patterns.
 
 ## How a scenario runs
 

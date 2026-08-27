@@ -105,7 +105,7 @@ If you find that some additional state (not present in the entities stored in th
 - Additional private information about each entity instance (not present in the entity contract).
 - State related to processing of events and third-party API synchronization.
 
-For each state object, you write its JSONSchema definition to `domains/<domain>/spanner/<name>.yaml` by following the JSONSchema guidelines in `./jsonschema-guidelines.md`.
+For each state object, you write its JSONSchema definition to `domains/<domain>/spanner/<name>.yaml` by following the JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
 
 ## Views on entities from other domains
 

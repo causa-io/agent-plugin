@@ -90,8 +90,8 @@ This is what the entity represents.
 
 </example>
 
-3. Learn the global JSONSchema guidelines in `./jsonschema-guidelines.md`.
-4. Read the example entity and event schemas in `./entity-example.yaml` and `./event-example.yaml`.
+3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
+4. Read the example entity and event schemas in `${CLAUDE_SKILL_DIR}/entity-example.yaml` and `${CLAUDE_SKILL_DIR}/event-example.yaml`.
 5. Write or update the contracts, following the guidelines below, the global JSONSchema guidelines, the examples, and existing contracts as reference.
 
 </instructions>
@@ -148,7 +148,7 @@ For an entity that defines a core business concept, you may define possible stat
 
 ## Example
 
-Read `./entity-example.yaml` for an example of an entity schema.
+Read `${CLAUDE_SKILL_DIR}/entity-example.yaml` for an example of an entity schema.
 
 # Event schemas
 
@@ -177,6 +177,6 @@ Constraints follow the same guidelines as entity constraints. In addition, if th
 
 ## Example
 
-Read `./event-example.yaml` for an example of an event schema.
+Read `${CLAUDE_SKILL_DIR}/event-example.yaml` for an example of an event schema.
 
 Use the exact types provided in the example. Use the exact description for `id`, `producedAt`, and `name`. Match the description of the `data` property to the entity being referenced.
