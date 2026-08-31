@@ -26,10 +26,10 @@ Follow these steps when designing or updating contracts:
 
 Engage in a dialogue with the user to fully understand the requirements. This is an iterative process:
 
-1. **Ask initial questions** based on the feature description and existing contracts.
-2. **Analyze the user's answers** and think deeply about implications, edge cases, and assumptions.
-3. **Ask follow-up questions** if any aspect remains unclear or has multiple valid interpretations.
-4. **Repeat** until you have enough information to propose a design with confidence.
+- **Ask initial questions** based on the feature description and existing contracts.
+- **Analyze the user's answers** and think deeply about implications, edge cases, and assumptions.
+- **Ask follow-up questions** if any aspect remains unclear or has multiple valid interpretations.
+- **Repeat** until you have enough information to propose a design with confidence.
 
 Only proceed to the next step when:
 - You understand the business concepts to be modeled.
