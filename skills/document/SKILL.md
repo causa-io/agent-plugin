@@ -37,3 +37,14 @@ Additional documents can be created at the root of the corresponding domain (i.e
 - Interaction with third-party systems.
 
 Concept documents should be referenced in the domain's sidebar, in `domains/<domain>/doc/config.ts`.
+
+<validation>
+
+1. Documentation was written only for entities that are core to the business domain, not for reusable or nested ones.
+2. Each entity document covers the entity's description, its state machine as a Mermaid diagram (if it has one), its corresponding event by ID (if any), and how users interact with it through the HTTP API (if any).
+3. Every created or updated document is referenced in the domain's sidebar, in `domains/<domain>/doc/config.ts`.
+4. Entities are listed in the domain's landing page, in `domains/<domain>/index.md`.
+5. That landing page's diagram of exposed APIs and consumed and produced events reflects the change.
+6. Only Markdown documentation was written. No implementation code or contracts were modified.
+
+</validation>

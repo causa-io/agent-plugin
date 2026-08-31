@@ -23,10 +23,10 @@ Follow these steps when designing or updating HTTP APIs:
 
 Engage in a dialogue with the user to fully understand the requirements. This is an iterative process:
 
-1. **Ask initial questions** based on the feature description and existing APIs.
-2. **Analyze the user's answers** and think deeply about implications, edge cases, and assumptions.
-3. **Ask follow-up questions** if any aspect remains unclear or has multiple valid interpretations.
-4. **Repeat** until you have enough information to propose a design with confidence.
+- **Ask initial questions** based on the feature description and existing APIs.
+- **Analyze the user's answers** and think deeply about implications, edge cases, and assumptions.
+- **Ask follow-up questions** if any aspect remains unclear or has multiple valid interpretations.
+- **Repeat** until you have enough information to propose a design with confidence.
 
 Only proceed to the next step when:
 - You understand the API operations needed.
@@ -76,8 +76,8 @@ The created entity.
 
 </example>
 
-3. Learn the global JSONSchema guidelines in `./jsonschema-guidelines.md`. Those should be used for DTOs.
-4. Read the example OpenAPI file in `./api-example.yaml`.
+3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`. Those should be used for DTOs.
+4. Read the example OpenAPI file in `${CLAUDE_SKILL_DIR}/api-example.yaml`.
 5. Write or update the HTTP API files and DTOs, following the guidelines below and existing files as reference.
 
 </instructions>
@@ -146,7 +146,7 @@ Think of possible business errors that can occur for each operation and specify 
 Error responses usually include the following fields:
 
 - `statusCode` (integer): The HTTP status code. Description is `The HTTP status code of the error.`.
-- `errorCode` (string): An error identifier, in the format `domain.errorName`. Description is `The HTTP status code of the error.`.
+- `errorCode` (string): An error identifier, in the format `domain.errorName`. Description is `An error identifier, as a string.`.
 - `message` (string): A human-readable error message. Description is `A message describing the error.`.
 
 ### (HTTP) response code
@@ -166,4 +166,4 @@ Follow these guidelines when choosing the response code for an error:
 
 ## Example
 
-Read `./api-example.yaml` for an example of an OpenAPI file. Read `./entity-example.yaml` for an example of a DTO file.
+Read `${CLAUDE_SKILL_DIR}/api-example.yaml` for an example of an OpenAPI file. Read `${CLAUDE_SKILL_DIR}/entity-example.yaml` for an example of a DTO file.

@@ -1,11 +1,26 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
-  "name": "skills",
+  "name": "causa",
   "description": "Engineering skills for designing, implementing, documenting, and releasing features based on the Causa framework.",
   "version": "1.1.0",
   "author": {
     "name": "Causa",
     "email": "contact@causa.io",
     "url": "https://github.com/causa-io"
-  }
+  },
+  "homepage": "https://github.com/causa-io/agent-plugin",
+  "repository": "https://github.com/causa-io/agent-plugin",
+  "license": "ISC",
+  "keywords": [
+    "causa",
+    "architecture",
+    "backend",
+    "typescript",
+    "nestjs",
+    "openapi",
+    "json-schema",
+    "spanner",
+    "firestore",
+    "documentation"
+  ]
 }

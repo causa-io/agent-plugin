@@ -23,10 +23,10 @@ Follow these steps when designing or updating Firestore collections:
 
 Engage in a dialogue with the user to fully understand the requirements. This is an iterative process:
 
-1. **Ask initial questions** based on the feature description and existing collections.
-2. **Analyze the user's answers** and think deeply about implications, edge cases, and assumptions.
-3. **Ask follow-up questions** if any aspect remains unclear or has multiple valid interpretations.
-4. **Repeat** until you have enough information to propose a design with confidence.
+- **Ask initial questions** based on the feature description and existing collections.
+- **Analyze the user's answers** and think deeply about implications, edge cases, and assumptions.
+- **Ask follow-up questions** if any aspect remains unclear or has multiple valid interpretations.
+- **Repeat** until you have enough information to propose a design with confidence.
 
 Only proceed to the next step when:
 - You understand which entities need real-time access.
@@ -81,8 +81,8 @@ View of the `Order` entity with `internalNotes` redacted.
 
 </example>
 
-3. Learn the global JSONSchema guidelines in `./jsonschema-guidelines.md`.
-4. Read the example Firestore document schema in `./firestore-document-example.yaml`.
+3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
+4. Read the example Firestore document schema in `${CLAUDE_SKILL_DIR}/firestore-document-example.yaml`.
 5. Write or update the Firestore document schemas and security rules, following the guidelines below and existing files as reference.
 
 </instructions>
@@ -152,7 +152,7 @@ causa:
 
 ## Example
 
-Read `./firestore-document-example.yaml` for an example of a Firestore document schema.
+Read `${CLAUDE_SKILL_DIR}/firestore-document-example.yaml` for an example of a Firestore document schema.
 
 # Security rules
 

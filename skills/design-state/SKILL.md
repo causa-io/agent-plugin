@@ -27,10 +27,10 @@ Follow these steps when designing or updating state and database schemas:
 
 Engage in a dialogue with the user to fully understand the requirements. This is an iterative process:
 
-1. **Ask initial questions** based on the feature description and existing state definitions.
-2. **Analyze the user's answers** and think deeply about implications, edge cases, and assumptions.
-3. **Ask follow-up questions** if any aspect remains unclear or has multiple valid interpretations.
-4. **Repeat** until you have enough information to propose a design with confidence.
+- **Ask initial questions** based on the feature description and existing state definitions.
+- **Analyze the user's answers** and think deeply about implications, edge cases, and assumptions.
+- **Ask follow-up questions** if any aspect remains unclear or has multiple valid interpretations.
+- **Repeat** until you have enough information to propose a design with confidence.
 
 Only proceed to the next step when:
 
@@ -56,8 +56,10 @@ Read the relevant contracts and APIs. Read existing state definitions and databa
 - Is an additional internal state (not present in entities) needed?
 - Propose your design and confirm the approach before making changes.
 
-3. Write or update the state object JSONSchema definitions (if any), following the guidelines below.
-4. Create new database schema files for domain entities and private state management, following the guidelines below.
+3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
+4. Read the example DDL file in `${CLAUDE_SKILL_DIR}/spanner-ddl-example.sql`.
+5. Write or update the state object JSONSchema definitions (if any), following the guidelines below.
+6. Create new database schema files for domain entities and private state management, following the guidelines below.
 
 </instructions>
 
@@ -92,6 +94,7 @@ Core business entities for the domain are usually stored in the database identic
 causa:
   googleSpannerTable:
     primaryKey: [id] # The list of columns forming the primary key.
+    name: MyTable # Optional, only when the table name differs from the schema title.
 ```
 
 This is the only change you're allowed to make to an entity contract, and only to entities owned by the domain being worked on.
@@ -105,7 +108,7 @@ If you find that some additional state (not present in the entities stored in th
 - Additional private information about each entity instance (not present in the entity contract).
 - State related to processing of events and third-party API synchronization.
 
-For each state object, you write its JSONSchema definition to `domains/<domain>/spanner/<name>.yaml` by following the JSONSchema guidelines in `./jsonschema-guidelines.md`.
+For each state object, you write its JSONSchema definition to `domains/<domain>/spanner/<name>.yaml` by following the JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
 
 ## Views on entities from other domains
 
@@ -123,6 +126,8 @@ Database schemas are Spanner DDL statements stored in `domains/<domain>/spanner/
 - Only define indexes for query patterns that are actually needed by services.
 - Do not add a trailing semicolon at the end of the file, only to separate statements.
 - Generated columns of type `STRING` must always use `STRING(MAX)`.
+- Tables holding entities or projections with a `deletedAt` property should define a row deletion policy, e.g. `ROW DELETION POLICY (OLDER_THAN(deletedAt, INTERVAL 1 DAY))`, so soft-deleted rows are eventually removed.
+- A child table that is always read alongside its parent can be interleaved, e.g. `INTERLEAVE IN PARENT MyEntity ON DELETE CASCADE`.
 
 There are several types of database schemas that you may need to design or edit.
 
@@ -143,3 +148,7 @@ All state objects identified in the previous section need to be created in the d
 - `NULL_FILTERED` can be used to remove rows with any `NULL` value in the indexed columns.
 - `STORING` can be used to add non-indexed columns to the index for performance reasons (no need to read the base table).
 - Generated columns can be used to provide more complex indexing logic (e.g. indexing a JSON field, indexing conditionally to a given state, etc). Those generated columns do not need to be `STORED`.
+
+## Example
+
+Read `${CLAUDE_SKILL_DIR}/spanner-ddl-example.sql` for an example of a DDL file, creating the table for the `MyEntity` entity along with an index.

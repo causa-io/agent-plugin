@@ -6,7 +6,7 @@ description: Bump the service version (including its active version) and update 
 1. Understand the feature or bug fix that was implemented, either from previous context or the changes on the current Git branch. Understand if the changes break backward compatibility. Ask for more context if needed.
 2. Ensure you are in the correct domain's service folder (usually `domains/<domain>/service`). Run all commands from there.
 3. Ensure there is no uncommitted code in the service you are working on. Uncommitted code outside the service does not matter. Otherwise, stop and ask for the uncommitted code to be committed first.
-4. Bump the service version using `npm version <newversion>`, where `<newversion>` is one of:
+4. Bump the service version using `npm version <newversion> --no-git-tag-version`, where `<newversion>` is one of:
    - `patch` for bug fixes and chores.
    - `minor` for new features without breaking changes.
    - `major` for new features with breaking changes, but only if the current version is `1.0.0` or higher. Otherwise, use `minor`.
@@ -15,3 +15,13 @@ description: Bump the service version (including its active version) and update 
 7. Commit `CHANGELOG.md` with a message like `📝 Update changelog`.
 8. Bump the service's `project.activeVersion` in `causa.yaml` to the new version as `release-X.Y.Z`, where `X.Y.Z` matches the bumped version in `package.json`.
 9. Commit `causa.yaml` with a message like `🚀 Deploy <service>-service X.Y.Z`, where the service matches the project name in `causa.yaml` and the version is the newly bumped version.
+
+<validation>
+
+1. The version in `package.json` is the newly bumped one, and `package-lock.json` was updated with it.
+2. `npm version` did not create a commit or a tag of its own.
+3. `CHANGELOG.md` has a new `## vX.Y.Z` section listing the changes, grouped and worded like existing entries.
+4. `project.activeVersion` in `causa.yaml` is `release-X.Y.Z`, matching the version in `package.json`.
+5. Exactly three commits were created, in order: the version, the changelog, and the deployment.
+
+</validation>
