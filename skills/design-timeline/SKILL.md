@@ -65,6 +65,14 @@ Write one YAML file per timeline. Determine the directory timelines live in from
 - **Scenario-monitoring timeline:** co-locate it next to the scenario file, while reusing existing naming conventions and allowed globs.
 - **Environment-observability timeline:** name it after what it observes.
 
+Start each file with the schema reference comment so editors validate it:
+
+```yaml
+# yaml-language-server: $schema=<path-to>/.causa/node_modules/@causa/workspace-core/dist/timeline/schemas/timeline.yaml
+```
+
+The `$schema` value is a path relative to the timeline file — adjust the number of leading `../` segments to the file's depth.
+
 </output>
 
 <validation>
