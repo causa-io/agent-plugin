@@ -29,7 +29,7 @@ Add the marketplace and install the plugin from within Claude Code:
 
 ```
 /plugin marketplace add causa-io/agent-plugin
-/plugin install skills@causa
+/plugin install causa@causa
 ```
 
 Then invoke a skill, e.g. `/build-feature`, or just describe the task and let Claude pick the relevant skill.
@@ -49,7 +49,7 @@ To enable the plugin for everyone working in a project, commit it to the project
     }
   },
   "enabledPlugins": {
-    "skills@causa": true
+    "causa@causa": true
   }
 }
 ```

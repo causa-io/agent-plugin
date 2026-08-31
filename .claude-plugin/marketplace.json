@@ -7,9 +7,12 @@
     "email": "contact@causa.io",
     "url": "https://github.com/causa-io"
   },
+  "renames": {
+    "skills": "causa"
+  },
   "plugins": [
     {
-      "name": "skills",
+      "name": "causa",
       "source": "./",
       "description": "Engineering skills for designing, implementing, documenting, and releasing features based on the Causa framework.",
       "category": "development",
