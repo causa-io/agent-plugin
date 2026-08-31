@@ -15,3 +15,13 @@ description: Bump the service version (including its active version) and update 
 7. Commit `CHANGELOG.md` with a message like `📝 Update changelog`.
 8. Bump the service's `project.activeVersion` in `causa.yaml` to the new version as `release-X.Y.Z`, where `X.Y.Z` matches the bumped version in `package.json`.
 9. Commit `causa.yaml` with a message like `🚀 Deploy <service>-service X.Y.Z`, where the service matches the project name in `causa.yaml` and the version is the newly bumped version.
+
+<validation>
+
+1. The version in `package.json` is the newly bumped one, and `package-lock.json` was updated with it.
+2. `npm version` did not create a commit or a tag of its own.
+3. `CHANGELOG.md` has a new `## vX.Y.Z` section listing the changes, grouped and worded like existing entries.
+4. `project.activeVersion` in `causa.yaml` is `release-X.Y.Z`, matching the version in `package.json`.
+5. Exactly three commits were created, in order: the version, the changelog, and the deployment.
+
+</validation>
