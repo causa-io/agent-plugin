@@ -1,53 +1,22 @@
 ---
 name: design-api-http
-description: Design HTTP APIs using OpenAPI. Use when the user asks to design, create, or update HTTP APIs, REST endpoints, or API contracts for a business domain. Use after designing entities and events.
+description: Reference for designing HTTP APIs using OpenAPI. Use when designing, creating, or updating HTTP APIs, REST endpoints, DTOs, or API contracts for a business domain, and load it before writing any OpenAPI or DTO file. Covers CRUD conventions, error responses, and the endpoints declared in `causa.yaml`.
 ---
 
-You are a software engineer only responsible for defining (software) contracts for business domains. You create and update those contracts. You do not write any implementation code. You focus on defining HTTP APIs using OpenAPI. You do not define base entities or events, however you may reference them and define additional DTOs as needed.
+Business domains expose an HTTP API, defined using one or several OpenAPI YAML files. Each file focuses on a single entity or feature of the domain.
 
-Business domains expose an HTTP API, defined using one or several OpenAPI YAML files. Each file focuses on a single entity or feature of the domain. Use existing files as reference.
-
-<objective>
-
-- HTTP APIs have been designed for the feature or bug fix the user asked for.
-- The designed HTTP APIs follow existing patterns and guidelines.
-- Those contracts can later be reused by other skills to implement the HTTP APIs.
-
-</objective>
+This reference covers OpenAPI contracts, the DTOs they reference, and the `endpoints.http` declaration that goes with them. Base entities and events are covered by `design-model` — they may be referenced here, but not defined here. Real-time read access for frontends is covered by `design-api-firestore`.
 
 <instructions>
 
-Follow these steps when designing or updating HTTP APIs:
+To design or update HTTP APIs:
 
-1. Understand the feature or bug fix through iterative questioning:
-
-Engage in a dialogue with the user to fully understand the requirements. This is an iterative process:
-
-- **Ask initial questions** based on the feature description and existing APIs.
-- **Analyze the user's answers** and think deeply about implications, edge cases, and assumptions.
-- **Ask follow-up questions** if any aspect remains unclear or has multiple valid interpretations.
-- **Repeat** until you have enough information to propose a design with confidence.
-
-Only proceed to the next step when:
-- You understand the API operations needed.
-- You have identified authorization requirements.
-- You have no remaining ambiguities that would affect the design.
-
-**Mandatory validation:** Even when invoked from another skill (e.g., `build-feature`) and even when a `requirements.md` file exists, you MUST ask at least one clarifying question or present your understanding for confirmation before proceeding. The user must explicitly approve before you move to the next step.
-
-Key questions to consider:
-- Who can access the API? Are there different roles or permission levels?
-- What are the commands / mutation operations (create, update, delete, custom) needed?
-- What are the query operations (get by ID, list with filters) needed?
-- What are the possible error cases for each operation?
-- In which domain should the HTTP APIs be designed?
-
-Read existing HTTP API files in the relevant domain, and in other domains if necessary.
-
-2. Think deeply about a proposal:
-
-- Identify the OpenAPI contracts and the DTOs (JSONSchema) that need to be created or updated.
-- Propose your design and confirm the approach before making changes.
+1. Read existing HTTP API files in the relevant domain, and in other domains if necessary. They are the ground truth for conventions.
+2. Identify the OpenAPI contracts and the DTOs (JSONSchema) that need to be created or updated: the commands and mutation operations, the query operations, who can access each of them, and the business errors each can return.
+3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`. Those should be used for DTOs.
+4. Read the example OpenAPI file in `${CLAUDE_SKILL_DIR}/api-example.yaml`.
+5. Write or update the HTTP API files and DTOs, following the guidelines below and existing files as reference.
+6. List the endpoints exposed by the service in `serviceContainer.endpoints.http`, in `domains/<domain>/service/causa.yaml`. Only the first path segment is listed, e.g. `/myEntities`.
 
 <example>
 
@@ -76,27 +45,24 @@ The created entity.
 
 </example>
 
-3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`. Those should be used for DTOs.
-4. Read the example OpenAPI file in `${CLAUDE_SKILL_DIR}/api-example.yaml`.
-5. Write or update the HTTP API files and DTOs, following the guidelines below and existing files as reference.
-
 </instructions>
 
 <output>
 
-Summarize the designed or updated HTTP API files and DTOs (link to them) in a Markdown file named `api-http-design.md`, in a work directory at `domains/<domain>/work/<feature-slug>/`. The directory may already exist if created by the `build-feature` skill or a previous design skill. If a `requirements.md` file exists in the directory, read it for additional context.
-
-Shortly explain the reasoning behind each change.
+- OpenAPI files in `domains/<domain>/api/<entity>.api.yaml`.
+- DTO schemas in `domains/<domain>/api/<name>.dto.yaml`.
+- Exposed endpoints listed in `serviceContainer.endpoints.http`, in `domains/<domain>/service/causa.yaml`.
 
 </output>
 
 <validation>
 
-1. All created and updated files are valid YAML files, and follow the global OpenAPI and JSONSchema guidelines.
-2. HTTP API schemas are located in `domains/<domain>/api/`, following the structure and splitting guidelines.
-3. The designed HTTP APIs correctly expose the commands and queries to solve the business needs the user asked for.
+1. The designed HTTP APIs correctly expose the commands and queries to solve the business needs asked for, with the authorization rules stated in each operation's `description`.
+2. All created and updated files are valid YAML files, and follow the global OpenAPI and JSONSchema guidelines.
+3. HTTP API schemas are located in `domains/<domain>/api/`, following the structure and splitting guidelines.
 4. Existing patterns are followed closely in the created and updated contracts.
-5. Code generation succeeds:
+5. Every exposed endpoint's first path segment appears in `serviceContainer.endpoints.http`.
+6. Code generation succeeds:
 
 - Run `cs model genCode` in the `service` folder of the corresponding domain to ensure the contract (DTO) files are valid.
 - Run `npm run typecheck` to ensure there are no TypeScript type errors. Focus on the generated code only.

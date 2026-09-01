@@ -1,40 +1,27 @@
 ---
 name: design-scenario
-description: Design end-to-end test scenarios for a feature or bug fix, then write them as scenario YAML files run against a development environment. Use for large or cross-domain features where a realistic, multi-step end-to-end test adds value. Designs the scenarios conversationally, then writes one YAML file per scenario.
+description: Reference for authoring end-to-end test scenarios as YAML files run against a development environment. Use when writing or updating a scenario that probes a real environment — calling HTTP APIs, querying databases, generating tokens, inspecting published events and service logs — and load it before writing any scenario file. Covers when a scenario is warranted, the call functions, the template language, and expectations.
 ---
 
-You are a software engineer who designs and authors end-to-end test scenarios for the backend. A scenario is a YAML file that probes a real (development) environment: it calls HTTP APIs, queries databases, generates tokens, and inspects published events and service logs, then asserts on the results.
+A scenario is a YAML file that probes a real (development) environment: it calls HTTP APIs, queries databases, generates tokens, and inspects published events and service logs, then asserts on the results.
 
-This skill has two parts:
-
-1. **Design** the scenario(s) — decide whether the feature or bug fix warrants a scenario, then design the realistic client flow(s) and the ordered steps and assertions, confirming with the user.
-2. **Write** each scenario as a valid, idiomatic YAML file, one at a time.
-
-<objective>
-
-- It is clear whether the feature or bug fix warrants one or more scenarios, and the user has confirmed.
-- Each warranted scenario is designed as a realistic, multi-step client flow with assertions, and confirmed with the user.
-- Each designed scenario is written as a YAML file that validates against the scenario JSONSchema and runs reliably against an eventually-consistent environment.
-
-</objective>
+This reference covers deciding whether a scenario is warranted, designing the flow, and writing the file. Timelines that visualize a scenario's runs are covered by `design-timeline`.
 
 <instructions>
 
-# Part 1 — Design the scenario(s)
-
 ## 1. Decide whether a scenario is warranted
 
-Scenarios are end-to-end tests that exercise the deployed system across realistic interactions. They are **not** a substitute for the unit/contract tests planned by `plan-tests`. Reserve them for cases where an end-to-end test adds real value:
+Scenarios are end-to-end tests that exercise the deployed system across realistic interactions. They are **not** a substitute for the contract-level tests written during implementation. Reserve them for cases where an end-to-end test adds real value:
 
 - A **useful scenario spans several domains**, or at least several features of a single domain. A scenario that exercises one endpoint in isolation is better covered by a contract test.
 - Scenarios should be **close to realistic interactions** that clients (e.g. the frontend) have with the backend — a sequence of calls a real user flow would produce, not an arbitrary probe.
-- **Not every feature or bug fix needs a scenario.** They are usually reserved for large features. If you are uncertain whether the current work warrants one, **ask the user for confirmation** before designing.
+- **Not every feature or bug fix needs a scenario.** They are usually reserved for large features.
 
-If no scenario is warranted, say so and stop.
+If no scenario is warranted, say so and stop. Do not write one to be thorough.
 
 ## 2. Gather context
 
-- Read the work directory for the feature or bug fix (`domains/<domain>/work/<feature-slug>/`): `requirements.md` and any design/plan outputs (`model-design.md`, `api-http-design.md`, `state-design.md`, `implementation-plan.md`, `test-plan.md`).
+- Read the work directory for the feature or bug fix (`domains/<domain>/work/<feature-slug>/`): `requirements.md`, `design.md`, and any implementation plan.
 - Read the relevant contracts in the affected `domains/<domain>/` (entities, events, API specs, Firestore/Spanner schemas) to know exact endpoints, field names, topic names, and table/collection names.
 - Look at existing scenarios for established style (see `<output>` for where they live).
 
@@ -46,18 +33,51 @@ Identify the realistic client flow(s) the feature enables. A large, cross-domain
 - The **ordered steps**: each client action (HTTP call) and each backend effect to assert — primarily state changes and published events, including the cross-domain propagation that makes the scenario worthwhile. Probe **service logs only when crucial information or errors are expected to be logged** (e.g. asserting a specific failure was reported). Do not add steps that check generic request logs — those carry no signal worth a scenario step.
 - Which steps observe **asynchronous** results (events, logs, projections built from events) and therefore need retries.
 
-## 4. Confirm with the user
+Do not write a separate design document.
 
-Present the designed scenario(s) conversationally: the flow, the ordered steps, and the key assertions. Do **not** write a separate design document. Confirm the design (and, for multiple scenarios, the set and their priority) before moving to Part 2.
+## 4. Write each scenario
 
-# Part 2 — Write each scenario
-
-Write one YAML file per confirmed scenario, **one at a time**. For each scenario, follow the steps below, then move to the next.
+Write one YAML file per scenario, **one at a time**. For each scenario, follow the steps below, then move to the next.
 
 1. Work top-down: `id`/`description`, declare `inputs`, set `defaultCallArgs` for shared HTTP config (base URL, auth header), then write each step.
 
 2. For every step decide:
    - Which call function and its `args` (see `# Reference`).
+   - Whether it needs `expectations`.
+   - Whether it needs `retry` (any step that observes an asynchronously-produced result: events, logs, projections).
+   - Whether it needs an explicit `after` (it must run after another step but does not reference that step's `output`).
+
+3. Re-read the file and run it through the `<validation>` checklist. Do not run the scenario yourself unless asked.
+
+</instructions>
+
+<output>
+
+Write one YAML file per scenario, named after the scenario (e.g. `<slug>.yaml`). Determine the directory scenarios live in from the Causa configuration (the `scenario.globs` in `causa.yaml`); fall back to the project documentation (e.g. `CLAUDE.md`), and if it is still unclear, ask the user. Do not assume a path.
+
+Start each file with the schema reference comment so editors validate it:
+
+```yaml
+# yaml-language-server: $schema=<path-to>/.causa/node_modules/@causa/workspace-core/dist/scenarios/schemas/scenario.yaml
+```
+
+The `$schema` value is a path relative to the scenario file — adjust the number of leading `../` segments to the file's depth.
+
+</output>
+
+<validation>
+
+1. The decision to write (or not write) a scenario is justified — it spans multiple domains or features and mirrors a realistic client flow.
+2. The file has a top-level `id` and `steps`; every step has a `call` with a `name`.
+3. Every `${ ... }` expression uses only available helpers: `input`, `output`, `configuration`, `str`, `rand`, and json-e builtins (`now`, `len`, …).
+4. Every `output('<id>')` and `after: [<id>]` references an existing step. No step references its own output in its `args`.
+5. Each call function's `args` match its signature (see `# Reference`).
+6. Steps observing asynchronous results (events, logs, projections) have a `retry` policy.
+7. Expectations use `toMatchObject` (subset) semantics by default; `exact: true` is only set where a full deep-equality match is intended.
+
+</validation>
+
+# Reference`).
    - Whether it needs `expectations`.
    - Whether it needs `retry` (any step that observes an asynchronously-produced result: events, logs, projections).
    - Whether it needs an explicit `after` (it must run after another step but does not reference that step's `output`).

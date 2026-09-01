@@ -1,59 +1,25 @@
 ---
 name: design-model
-description: Design entity and event schemas. Use when the user asks to design, create, or update entities, events, or data models for a business domain. Use before designing APIs and service internal states.
+description: Reference for designing entity and event schemas. Use when designing, creating, or updating entities, events, or data models for a business domain, and load it before writing any entity or event contract. Covers JSONSchema conventions, state machines, constraints, and the emitted topics declared in `causa.yaml`.
 ---
 
-You are a software engineer only responsible for defining (software) contracts for business domains. You create and update those contracts. You do not write any implementation code. Those contracts are:
+Entities and events are the contracts a business domain publishes:
 
 - Entities, managed and exposed by domains through HTTP APIs.
 - Events, emitted by domains, either when entities change or for other business reasons.
 
-You do not write HTTP API contracts.
-
-<objective>
-
-- Entities have been designed to represent the core business concepts the user asked for.
-- Events have been designed, both for those entities (when relevant) and for other business concepts the user asked for.
-- Those contracts can later be reused by other skills to design APIs and service's internal states.
-
-</objective>
+This reference covers those two contracts and the `outputs.eventTopics` declaration that goes with them. HTTP API contracts are covered by `design-api-http`. Consuming an event — a trigger on a topic, whether it belongs to this domain or another — is covered by `design-triggers`, and is independent of this reference: a topic designed here needs no consumer.
 
 <instructions>
 
-Follow these steps when designing or updating contracts:
+To design or update entity and event contracts:
 
-1. Understand the feature or bug fix through iterative questioning:
-
-Engage in a dialogue with the user to fully understand the requirements. This is an iterative process:
-
-- **Ask initial questions** based on the feature description and existing contracts.
-- **Analyze the user's answers** and think deeply about implications, edge cases, and assumptions.
-- **Ask follow-up questions** if any aspect remains unclear or has multiple valid interpretations.
-- **Repeat** until you have enough information to propose a design with confidence.
-
-Only proceed to the next step when:
-- You understand the business concepts to be modeled.
-- You have identified which entities and events are needed.
-- You have no remaining ambiguities that would affect the design.
-
-**Mandatory validation:** Even when invoked from another skill (e.g., `build-feature`) and even when a `requirements.md` file exists, you MUST ask at least one clarifying question or present your understanding for confirmation before proceeding. The user must explicitly approve before you move to the next step.
-
-Key questions to consider:
-- What business concepts need to be represented?
-- In which domain should these contracts be designed?
-- Do these concepts have lifecycle states? What triggers transitions?
-- How will these entities be created, updated, and deleted?
-- What events need to be emitted, and who will consume them?
-
-Read existing contracts in the relevant domain, and in other domains if necessary.
-
-2. Think deeply about a proposal:
-
-- Identify the entities and events that need to be created or updated.
-- Do they have a state machine? If so, what are the states and transitions?
-- Are changes to those entities triggered by other events in the system? Commands issued by users?
-- Is it already known how those entities and events can be consumed by other domains and systems?
-- Propose your design and confirm the approach before making changes.
+1. Read existing contracts in the relevant domain, and in other domains if necessary. They are the ground truth for conventions.
+2. Identify the entities and events that need to be created or updated. Determine whether they have a state machine, what its states and transitions are, and which changes are triggered by other events or by user commands.
+3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
+4. Read the example entity and event schemas in `${CLAUDE_SKILL_DIR}/entity-example.yaml` and `${CLAUDE_SKILL_DIR}/event-example.yaml`.
+5. Write or update the contracts, following the guidelines below, the global JSONSchema guidelines, the examples, and existing contracts as reference.
+6. Add every topic the domain emits to `serviceContainer.outputs.eventTopics` in `domains/<domain>/service/causa.yaml`, in the format `<domain>.<event>.<version>`.
 
 <example>
 
@@ -90,27 +56,24 @@ This is what the entity represents.
 
 </example>
 
-3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
-4. Read the example entity and event schemas in `${CLAUDE_SKILL_DIR}/entity-example.yaml` and `${CLAUDE_SKILL_DIR}/event-example.yaml`.
-5. Write or update the contracts, following the guidelines below, the global JSONSchema guidelines, the examples, and existing contracts as reference.
-
 </instructions>
 
 <output>
 
-Summarize the designed entities and events (link to them) in a Markdown file named `model-design.md`, in a work directory at `domains/<domain>/work/<feature-slug>/`. The directory may already exist if created by the `build-feature` skill or a previous design skill. If a `requirements.md` file exists in the directory, read it for additional context.
-
-Shortly explain the reasoning behind each change.
+- Entity schemas in `domains/<domain>/entities/<entity>.yaml`.
+- Event schemas in `domains/<domain>/events/<event>/<version>.yaml`.
+- Emitted topics listed in `serviceContainer.outputs.eventTopics`, in `domains/<domain>/service/causa.yaml`.
 
 </output>
 
 <validation>
 
-1. All created and updated files are valid YAML files, and follow the global JSONSchema guidelines.
-2. Entity schemas are located in `domains/<domain>/entities/` and event schemas in `domains/<domain>/events/`, following the structure and splitting guidelines.
-3. Entities and events correctly model the business concepts the user asked for.
+1. Entities represent the core business concepts asked for, and events cover both entity changes and the other business concepts asked for.
+2. All created and updated files are valid YAML files, and follow the global JSONSchema guidelines.
+3. Entity schemas are located in `domains/<domain>/entities/` and event schemas in `domains/<domain>/events/`, following the structure and splitting guidelines.
 4. Existing patterns are followed closely in the created and updated contracts.
-5. Code generation succeeds:
+5. Every topic the domain emits appears in `serviceContainer.outputs.eventTopics`.
+6. Code generation succeeds:
 
 - Run `cs model genCode` in the `service` folder of the corresponding domain to ensure the contract files are valid.
 - Run `npm run typecheck` to ensure there are no TypeScript type errors. Focus on the generated code only.

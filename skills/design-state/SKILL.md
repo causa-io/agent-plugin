@@ -1,88 +1,84 @@
 ---
 name: design-state
-description: Design the state objects and database schemas needed to implement a feature or fix a bug. Use when the user asks to design database tables, Spanner schemas, state objects, or storage for a business domain. Use after designing entities, events, and APIs.
+description: Reference for designing access patterns, state objects, and Spanner database schemas. Use when designing database tables, Spanner schemas, indexes, query patterns, or storage for a business domain, and load it before writing any state schema or DDL file. Covers access patterns, indexes, row deletion policies, and the databases declared in `causa.yaml`.
 ---
 
-You are a software engineer only responsible for defining the state (usually database schemas) needed to implement a feature or fix a bug. You create and update those definitions. You do not write any implementation code.
+The state of a domain is what its service persists and how it reads it back: the entities stored in Spanner, the private state and projections alongside them, the access patterns the service needs, and the indexes that serve those patterns.
 
-You assume that the entities, events, and APIs needed to implement the feature or fix the bug have already been designed. You do not change those contracts, except for adding Spanner table definitions to entity JSONSchema definitions when relevant.
+This reference covers all of the above and the `outputs.google.spanner` declaration that goes with them. It assumes entities, events, and APIs have already been designed, and does not change them — with one exception, adding the Spanner table definition to an entity JSONSchema, described below.
 
-- Entities are defined in `domains/<domain>/entities/<entity>.yaml`.
-- Events are defined in `domains/<domain>/events/<event>/<version>.yaml`.
-- HTTP APIs are defined in `domains/<domain>/api/` (designed by `design-api-http`).
-- Firestore collections are defined in `domains/<domain>/firestore/<name>.yaml` (designed by `design-api-firestore`).
-
-<objective>
-
-- The state objects, database schemas, and indexes needed to implement the feature or fix the bug have been designed.
-- Those definitions follow existing patterns and guidelines.
-
-</objective>
+- Entities are defined in `domains/<domain>/entities/<entity>.yaml` (covered by `design-model`).
+- Events are defined in `domains/<domain>/events/<event>/<version>.yaml` (covered by `design-model`).
+- HTTP APIs are defined in `domains/<domain>/api/` (covered by `design-api-http`).
+- Firestore collections are defined in `domains/<domain>/firestore/<name>.yaml` (covered by `design-api-firestore`).
+- Triggers, which are a major source of access patterns, are covered by `design-triggers`.
 
 <instructions>
 
-Follow these steps when designing or updating state and database schemas:
+To design or update access patterns, state, and database schemas:
 
-1. Understand the feature or bug fix through iterative questioning:
-
-Engage in a dialogue with the user to fully understand the requirements. This is an iterative process:
-
-- **Ask initial questions** based on the feature description and existing state definitions.
-- **Analyze the user's answers** and think deeply about implications, edge cases, and assumptions.
-- **Ask follow-up questions** if any aspect remains unclear or has multiple valid interpretations.
-- **Repeat** until you have enough information to propose a design with confidence.
-
-Only proceed to the next step when:
-
-- You understand the storage and query requirements.
-- You have identified which indexes are needed.
-- You have no remaining ambiguities that would affect the design.
-
-**Mandatory validation:** Even when invoked from another skill (e.g., `build-feature`) and even when a `requirements.md` file exists, you MUST ask at least one clarifying question or present your understanding for confirmation before proceeding. The user must explicitly approve before you move to the next step.
-
-Key questions to consider:
-
-- What query patterns need to be supported by indexes?
-- Are views on entities from other domains needed?
-- Is additional internal state (beyond entities) needed?
-- In which domain should the state be designed?
-
-Read the relevant contracts and APIs. Read existing state definitions and database schemas in the relevant domain, ensuring you will only add what is necessary compared to existing state definitions.
-
-2. Think deeply about a proposal:
-
-- What indexes are needed to support queries by services?
-- Are there any views on entities from other domains needed?
-- Is an additional internal state (not present in entities) needed?
-- Propose your design and confirm the approach before making changes.
-
-3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
-4. Read the example DDL file in `${CLAUDE_SKILL_DIR}/spanner-ddl-example.sql`.
-5. Write or update the state object JSONSchema definitions (if any), following the guidelines below.
-6. Create new database schema files for domain entities and private state management, following the guidelines below.
+1. Read the relevant contracts and APIs. Read existing state definitions and database schemas in the relevant domain, ensuring you will only add what is necessary compared to what already exists.
+2. Enumerate the access patterns the feature needs, following the "Access patterns" section below. This comes before indexes: an index is only justified by a pattern.
+3. Identify whether additional internal state (beyond entities) is needed, and whether views on entities from other domains are needed.
+4. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
+5. Read the example DDL file in `${CLAUDE_SKILL_DIR}/spanner-ddl-example.sql`.
+6. Write or update the state object JSONSchema definitions (if any), following the guidelines below.
+7. Create new database schema files for domain entities and private state management, with the indexes the access patterns require, following the guidelines below.
+8. List the databases written by the service in `serviceContainer.outputs.google.spanner`, in `domains/<domain>/service/causa.yaml`, in the format `<instance>.<database>`, e.g. `backend.content`.
 
 </instructions>
 
 <output>
 
-Summarize the designed state objects and database schemas (link to them) in a Markdown file named `state-design.md`, in a work directory at `domains/<domain>/work/<feature-slug>/`. The directory may already exist if created by the `build-feature` skill or a previous design skill. If a `requirements.md` file exists in the directory, read it for additional context.
-
-Shortly explain the reasoning behind each change.
+- State object and projection schemas in `domains/<domain>/spanner/<name>.yaml`.
+- Spanner DDL in `domains/<domain>/spanner/<number>-<file>.sql`.
+- The Spanner table definition added to entity schemas in `domains/<domain>/entities/<entity>.yaml`.
+- Databases listed in `serviceContainer.outputs.google.spanner`, in `domains/<domain>/service/causa.yaml`.
+- The access patterns table, in the design document held by the caller. It is working material for the design, not a permanent artifact: the durable record of what access is supported is the set of indexes on disk.
 
 </output>
 
 <validation>
 
-1. All created and updated YAML files are valid JSONSchema files, and follow the global JSONSchema guidelines.
-2. All created and updated SQL files are valid Spanner DDL files, following the guidelines.
-3. Existing patterns are followed closely in the created and updated files.
-4. DDL files are correctly applied and the Spanner emulator starts without DDL errors: run `cs emulators start google.spanner` for this.
-5. Code generation succeeds:
+1. Every access pattern the feature needs is listed, including the ones that come from event handlers, crons, tasks, and internal logic rather than from an API endpoint.
+2. Every access pattern is served by an index, or by a primary key prefix that covers its filter and ordering. State that key or index explicitly for each pattern.
+3. No index is defined that no access pattern justifies.
+4. All created and updated YAML files are valid JSONSchema files, and follow the global JSONSchema guidelines.
+5. All created and updated SQL files are valid Spanner DDL files, following the guidelines.
+6. Existing patterns are followed closely in the created and updated files.
+7. Every database written by the service appears in `serviceContainer.outputs.google.spanner`.
+8. DDL files are correctly applied and the Spanner emulator starts without DDL errors: run `cs emulators start google.spanner` for this.
+9. Code generation succeeds:
 
 - Run `cs model genCode` in the `service` folder of the corresponding domain to ensure the state files are valid.
 - Run `npm run typecheck` to ensure there are no TypeScript type errors. Focus on the generated code only.
 
 </validation>
+
+# Access patterns
+
+An index is justified by a query, so the queries have to be known before the indexes are designed. List every way the feature reads data, as a table:
+
+<example>
+
+| # | Pattern | Source | Store | Filter / order | Index | Volume |
+| --- | --- | --- | --- | --- | --- | --- |
+| Q1 | A user's pending orders, newest first | `GET /orders` | Spanner | `userId`, `state`, `-createdAt` | `OrdersByUserAndState` | ~100 per user |
+| Q2 | An order by its external payment reference | `handlePaymentSettled` trigger | Spanner | `paymentRef` | `OrdersByPaymentRef` | 1 |
+| Q3 | Orders left pending for more than 24h | `handleOrderExpiry` cron | Spanner | `state`, `createdAt <` | `OrdersByStateAndCreatedAt`, `NULL_FILTERED` | ~1k per night |
+| Q4 | A client's live order feed | web app | Firestore | `userId`, `-updatedAt` | — | ~10 per user |
+
+</example>
+
+Access patterns come from five places. The first two are visible in the API contracts; the last three are the ones that get missed:
+
+- **HTTP endpoints**: every list, filter, and lookup operation in the OpenAPI files.
+- **Firestore queries** run by clients against the collections the domain publishes.
+- **Event handlers**: what a handler looks up when it fires, usually by a foreign key carried in the event.
+- **Crons and background sweeps**: scans, expiry, reconciliation. These are often the only pattern that filters on a timestamp, and often the one that needs a dedicated index.
+- **Internal business logic**: uniqueness checks, validation lookups, and reads a service performs before a mutation.
+
+The `Volume` column is an estimate of how many rows the pattern returns, or how often it runs. It is the column most worth confirming with a human: it decides whether an index is needed at all, whether a query needs to stream in batches, and whether a scan is acceptable.
 
 # State objects design
 

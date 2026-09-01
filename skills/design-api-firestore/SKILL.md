@@ -1,53 +1,22 @@
 ---
 name: design-api-firestore
-description: Design Firestore APIs for real-time data access. Use when the user asks to design, create, or update Firestore collections, documents, or security rules for a business domain. Use after designing entities and events.
+description: Reference for designing Firestore collections and security rules for real-time data access. Use when designing, creating, or updating Firestore collections, documents, or security rules for a business domain, and load it before writing any Firestore document schema or rule. Covers collection paths, redaction, and the collections declared in `causa.yaml`.
 ---
 
-You are a software engineer only responsible for defining (software) contracts for business domains. You create and update those contracts. You do not write any implementation code. You focus on defining Firestore collections and security rules for real-time data access by frontends. You do not define base entities or events, however you may reference them.
+Firestore collections are views of entities, asynchronously replicated from entity events. They provide real-time subscriptions for frontends.
 
-Firestore collections are views of entities that are asynchronously replicated from entity events. They provide real-time subscriptions for frontends. Use existing files as reference.
-
-<objective>
-
-- Firestore document schemas have been designed for the feature or bug fix the user asked for.
-- Security rules have been designed to control read access to the collections.
-- Those contracts can later be reused by other skills to implement the Firestore replication.
-
-</objective>
+This reference covers Firestore document schemas, their security rules, and the `outputs.google.firestore` declaration that goes with them. Base entities and events are covered by `design-model` — they may be referenced here, but not defined here. Request/response APIs are covered by `design-api-http`.
 
 <instructions>
 
-Follow these steps when designing or updating Firestore collections:
+To design or update Firestore collections:
 
-1. Understand the feature or bug fix through iterative questioning:
-
-Engage in a dialogue with the user to fully understand the requirements. This is an iterative process:
-
-- **Ask initial questions** based on the feature description and existing collections.
-- **Analyze the user's answers** and think deeply about implications, edge cases, and assumptions.
-- **Ask follow-up questions** if any aspect remains unclear or has multiple valid interpretations.
-- **Repeat** until you have enough information to propose a design with confidence.
-
-Only proceed to the next step when:
-- You understand which entities need real-time access.
-- You have identified access control requirements.
-- You have no remaining ambiguities that would affect the design.
-
-**Mandatory validation:** Even when invoked from another skill (e.g., `build-feature`) and even when a `requirements.md` file exists, you MUST ask at least one clarifying question or present your understanding for confirmation before proceeding. The user must explicitly approve before you move to the next step.
-
-Key questions to consider:
-- Which entities need to be exposed to the frontend in real-time?
-- What properties should be included or redacted from the view?
-- Who can access this data? What are the access control rules?
-- Should the collection be nested (composite key) or root-level (single ID)?
-- In which domain should the Firestore collections be designed?
-
-Read existing Firestore collections in the relevant domain, and in other domains if necessary. Read the entity schemas that will be projected as Firestore documents.
-
-2. Think deeply about a proposal:
-
-- Identify the Firestore document schemas and security rules that need to be created or updated.
-- Propose your design and confirm the approach before making changes.
+1. Read existing Firestore collections in the relevant domain, and in other domains if necessary. Read the entity schemas that will be projected as Firestore documents.
+2. Identify the document schemas and security rules that need to be created or updated: which entities need real-time access, which properties are exposed or redacted, who can read them, and whether the collection is root-level or nested.
+3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
+4. Read the example Firestore document schema in `${CLAUDE_SKILL_DIR}/firestore-document-example.yaml`.
+5. Write or update the Firestore document schemas and security rules, following the guidelines below and existing files as reference.
+6. List the root collections written by the service in `serviceContainer.outputs.google.firestore`, in `domains/<domain>/service/causa.yaml`.
 
 <example>
 
@@ -81,28 +50,25 @@ View of the `Order` entity with `internalNotes` redacted.
 
 </example>
 
-3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
-4. Read the example Firestore document schema in `${CLAUDE_SKILL_DIR}/firestore-document-example.yaml`.
-5. Write or update the Firestore document schemas and security rules, following the guidelines below and existing files as reference.
-
 </instructions>
 
 <output>
 
-Summarize the designed or updated Firestore collections and security rules (link to them) in a Markdown file named `api-firestore-design.md`, in a work directory at `domains/<domain>/work/<feature-slug>/`. The directory may already exist if created by the `build-feature` skill or a previous design skill. If a `requirements.md` file exists in the directory, read it for additional context.
-
-Shortly explain the reasoning behind each change.
+- Firestore document schemas in `domains/<domain>/firestore/<name>.yaml`.
+- Security rules in `domains/<domain>/firestore/firestore.rules`.
+- Root collections listed in `serviceContainer.outputs.google.firestore`, in `domains/<domain>/service/causa.yaml`.
 
 </output>
 
 <validation>
 
-1. All created and updated YAML files are valid JSONSchema files, and follow the global JSONSchema guidelines.
-2. Firestore document schemas are located in `domains/<domain>/firestore/`, following the structure and naming guidelines.
-3. Security rules are located in `domains/<domain>/firestore/firestore.rules`.
-4. The designed Firestore collections correctly expose the data needed for real-time access by frontends.
+1. The designed Firestore collections correctly expose the data needed for real-time access by frontends, with properties redacted where access control requires it.
+2. All created and updated YAML files are valid JSONSchema files, and follow the global JSONSchema guidelines.
+3. Firestore document schemas are located in `domains/<domain>/firestore/`, following the structure and naming guidelines.
+4. Security rules are located in `domains/<domain>/firestore/firestore.rules`, and no collection is readable by a caller who should not see it.
 5. Existing patterns are followed closely in the created and updated contracts.
-6. Code generation succeeds:
+6. Every root collection written by the service appears in `serviceContainer.outputs.google.firestore`.
+7. Code generation succeeds:
 
 - Run `cs model genCode` in the `service` folder of the corresponding domain to ensure the document schema files are valid.
 - Run `npm run typecheck` to ensure there are no TypeScript type errors. Focus on the generated code only.

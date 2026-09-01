@@ -1,166 +1,108 @@
 ---
 name: plan-tests
-description: Plan the tests needed to cover a feature or bug fix, favoring contract-level tests over unit tests. Use when the user asks to plan, design, or list the tests for a feature or bug fix. Use after planning the implementation and before writing code.
+description: List the behaviors a feature or bug fix must have covered by tests, derived from its contracts. Use when the user asks which tests are needed, or to plan or design the test coverage for a feature or bug fix. Use during design, once the contracts exist, and before writing any code.
 ---
 
-You are a software engineer responsible for defining the tests that should be written to ensure a feature or bug fix is properly covered. You do not write the tests themselves, only their design. You favor tests at the contract level (HTTP APIs and event processing), only falling back to service-level unit tests for complex logic.
+You are a software engineer responsible for deciding **what** must be covered by tests, not how to test it. You derive that list from the contracts — the HTTP API, the events, the entity state machines, the Firestore rules — so that coverage is driven by what the domain promises, not by what the code happens to do.
+
+You do not write tests, test skeletons, or `describe`/`it` structures. How a behavior is best tested is decided while the code is written, when the fixtures and the shape of the implementation are known.
 
 <objective>
 
-- The tests needed to cover the feature or bug fix have been identified and designed.
-- The test plan follows existing patterns and guidelines.
-- The test plan can later be used by other skills to implement the tests.
+- Every behavior the feature's contracts promise is listed, in a form a human can scan in under a minute.
+- The list is derived from the contracts, not from an implementation plan.
+- The list can later be used to check that the written tests cover what they should.
 
 </objective>
 
 <instructions>
 
-Follow these steps when planning tests:
+1. Read the contracts the feature creates or changes:
 
-1. Understand the feature or bug fix to be implemented:
+- HTTP API contracts in `domains/<domain>/api`: every operation, and every error response it declares.
+- Entity contracts in `domains/<domain>/entities`: every state and every transition.
+- Event contracts in `domains/<domain>/events`, and the triggers in `domains/<domain>/service/causa.yaml`: every event the service reacts to.
+- Firestore document schemas and security rules in `domains/<domain>/firestore`.
+- `requirements.md` in the work directory, for behavior the contracts do not express.
 
-- Ask for context (if not already available) and make suggestions.
-- Find out in which domain the tests should be planned.
-- Read existing contracts and code:
-  - Relevant entity contracts in `domains/<domain>/entities`.
-  - Relevant event contracts in `domains/<domain>/events`.
-  - Relevant HTTP API contracts in `domains/<domain>/api`.
-  - Relevant Firestore collection contracts in `domains/<domain>/firestore`.
-  - The implementation plan in `domains/<domain>/work/<feature-slug>/implementation-plan.md` if available.
-  - Existing tests in `domains/<domain>/service/src/**/*.spec.ts` as reference.
+2. List the behaviors that must be covered. Work through the contracts systematically rather than from memory:
 
-2. Think deeply about a proposal:
+- One line per error response declared by an operation.
+- One line per state transition an entity can undergo, including the event it emits.
+- One line per authentication and authorization failure, on each operation.
+- One line per successful operation, covering the mutation and its event together.
+- For a bug fix, the behavior that is currently broken, phrased so that the test would fail today.
 
-- Identify the test files that need to be created or updated.
-- What are the main test cases for each file?
-- Propose your design and confirm the approach before making changes.
+3. Write the list, following the guidelines below.
 
 <example>
 
-## `api.controller.create.spec.ts` (new)
+## Behaviors to cover
 
-```typescript
-describe('OrderApiController', () => {
-  describe('POST /orders', () => {
-    it('should return 401 for unauthenticated request', async () => {});
-
-    it.each([
-      // orderId is not a valid UUID
-      // items array is empty
-      // items contains negative quantity
-    ])('should return 400 for invalid input', async () => {});
-
-    it('should return 400 when product does not exist', async () => {
-      // Setup: No product in database
-      // Verify: 400 response with orders.productNotFound error
-    });
-
-    it('should create order and publish event', async () => {
-      // Setup: Existing products, authenticated user
-      // Verify: 201 response, order in database, OrderCreatedEvent published
-    });
-  });
-});
-```
-
-## `event.controller.spec.ts` (update)
-
-```typescript
-describe('InventoryEventController', () => {
-  describe('handleOrderCreated', () => {
-    it('should decrease product stock on order creation', async () => {
-      // Setup: Product with stock=10, OrderCreatedEvent with quantity=3
-      // Verify: Product stock updated to 7
-    });
-
-    it('should handle out-of-stock gracefully', async () => {
-      // Setup: Product with stock=0, OrderCreatedEvent
-      // Verify: Error logged, event not retried
-    });
-  });
-});
-```
+- `POST /orders` rejects an unauthenticated request.
+- `POST /orders` rejects invalid input: non-UUID `productId`, empty `items`, negative quantity.
+- `POST /orders` returns `orders.productNotFound` when a referenced product does not exist.
+- `POST /orders` creates the order and emits `orderCreated`.
+- `POST /orders/{id}/cancel` returns `orders.notCancellable` for an order that already shipped.
+- `POST /orders/{id}/cancel` moves `pending → cancelled` and emits `orderCancelled`.
+- `handlePaymentSettled` moves `pending → paid` and emits `orderPaid`.
+- `handlePaymentSettled` is idempotent: a second delivery of the same event changes nothing.
+- `handlePaymentSettled` acknowledges (does not retry) an event for an unknown order, and logs it.
+- A user cannot read another user's order document in Firestore.
 
 </example>
-
-3. Write the test plan, following the guidelines below.
 
 </instructions>
 
 <output>
 
-Write the test plan in a Markdown file named `test-plan.md`, in a work directory at `domains/<domain>/work/<feature-slug>/`. The directory may already exist if created by the `build-feature` skill or a previous design skill. If a `requirements.md` or `implementation-plan.md` file exists in the directory, read it for additional context.
+A `## Behaviors to cover` section in the feature's design document, in the work directory at `domains/<domain>/work/<feature-slug>/`.
 
-For each test file:
-
-1. Indicate whether it is a new file or an update to an existing file.
-2. Provide a TypeScript code block with `describe`, `it`, and `it.each` blocks (without implementation).
-3. Include setup and verification hints as comments within each test case.
+One line per behavior, phrased as an observable outcome. No code, no test file names, no `describe`/`it` blocks, no setup hints. The list exists so a human can read it in under a minute and notice what is missing.
 
 </output>
 
 <validation>
 
-1. All test files needed to cover the feature or bug fix have been identified.
-2. The test plan follows existing patterns in the codebase (file naming, describe/it structure, etc.).
-3. Tests focus on contract-level testing (HTTP APIs, event handlers) with unit tests only for complex logic.
-4. Each test case includes clear setup and verification hints.
+1. Every error response declared in the HTTP API contracts has a line.
+2. Every entity state transition has a line, including the event it emits.
+3. Every operation has an authentication line, and an authorization line where roles or ownership apply.
+4. Every trigger has a line for its successful path, and a line for its behavior on a duplicate delivery.
+5. For a bug fix, there is a line describing the behavior that is broken today.
+6. Every line is an observable outcome, not an implementation detail.
+7. The list contains no test file names, no code, and no test structure.
 
 </validation>
 
 # Guidelines
 
-## Test categories
+## What belongs on the list
 
-Most tests should be at the contract level, i.e. testing:
+Behaviors that are observable at the boundary of the service: an HTTP response, an entity mutation, a published event, a log the service is expected to emit, a document a client can or cannot read.
 
-- **HTTP API controllers**: The HTTP API(s) exposed by the domain's service.
-- **Event handler controllers**: The processing of events by the domain's service.
+## What does not belong on the list
 
-Only suggest unit tests on services for the following cases:
+- **How** a behavior will be tested: fixtures, file names, mocking, structure. That is decided when the code is written.
+- Internal logic with no contract-level expression. A complex pricing calculation deserves direct tests, but it cannot be listed here because it does not exist yet, and the decision to test it directly depends on the shape it takes. That call is made while writing the code, and audited during review.
+- Coverage of code paths that no contract and no requirement asks for.
 
-- For complex logic in a service that would be too cumbersome to test through the API or event handlers.
-- For service logic that is called by many controllers, to avoid duplication of tests at the controller level.
-- For logic involving hard-to-mock third-party APIs.
+## Level
 
-## HTTP API controller tests
+Most behaviors on the list are covered at the contract level, by testing the HTTP API or the event handlers. That is the default and it does not need stating.
 
-API controller tests should focus on:
+Direct unit tests are the exception, warranted for logic that contract-level tests reach only incidentally. That decision belongs to whoever writes the code, since the logic does not exist yet — but the shapes that usually warrant one are worth knowing in advance:
 
-- **Authentication**: Ensuring unauthenticated requests are rejected (401).
-- **Authorization**: Ensuring only the right roles/users can access the API (403 or 404).
-- **Input validation**: Ensuring invalid inputs are rejected (400). Group similar validation errors with `it.each`.
-- **Business errors**: Ensuring the right error codes are returned for business rule violations (400, 404, 409).
-- **Successful operations**: Ensuring entities are mutated as expected and the right events are published.
+- Pure computation with no I/O.
+- Combinatorics that would be absurd to cover at the contract level: a dozen input combinations are trivial as unit cases and unreasonable as a dozen API calls.
+- Money, date, timezone, and rounding arithmetic.
+- Retry, backoff, and idempotency-key logic.
+- State transition tables.
 
-## Event handler controller tests
+## Grouping
 
-Event handler tests should focus on:
+Group variations of the same outcome onto one line rather than enumerating them: "rejects invalid input: non-UUID `productId`, empty `items`, negative quantity" is one behavior with three cases, not three behaviors.
 
-- **Successful operations**: Ensuring entities are mutated as expected and the right events are published.
-- **Error handling**: Ensuring the right errors are logged and retries happen as expected.
-- **Idempotency**: Ensuring duplicate events are handled correctly.
+## Scope
 
-- Only retryable errors are expected to return a `503` status code. All other responses should be `200` to acknowledge the event. Errors that are not caught at the controller level are still caught by an interceptor and result in a `200` response. The logging fixture should be used to assert the error has occurred and been logged.
-
-## Grouping test cases
-
-When several tests have slightly different setup but expect the same outcome, group them with `it.each`:
-
-- Basic input validation errors (invalid UUIDs, missing fields, out-of-range values).
-- Similar authorization failures for different roles.
-
-Provide each case as a comment within the `it.each([])` array.
-
-## Limiting test scope
-
-- Limit the number of successful operation tests. Both entity mutations and published events can be verified in a single test.
-- Do not suggest updates to the model or test utilities in `src/model/*`. Those are automatically generated.
-
-## File naming conventions
-
-Test files follow these naming patterns:
-
-- `api.controller.<operation>.spec.ts` - HTTP API tests for a specific operation (e.g., `api.controller.create.spec.ts`).
-- `event.controller.<handler>.spec.ts` - Event handler tests (e.g., `event.controller.firestore.spec.ts`).
-- `<service>.service.spec.ts` - Unit tests for a specific service (e.g., `validator.service.spec.ts`).
+- Keep the successful-operation lines few. An entity mutation and the event it emits are one behavior, verified together.
+- Do not list behavior of generated code: models, DTOs, and testing utilities in `src/model/*` are generated and are not the feature's responsibility.

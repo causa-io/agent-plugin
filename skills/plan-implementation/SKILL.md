@@ -1,21 +1,19 @@
 ---
 name: plan-implementation
-description: Plan the implementation of a feature or bug fix by defining the services and controllers needed. Use when the user asks to plan, architect, or design the implementation of a feature or bug fix. Use after designing entities, events, APIs, and state.
+description: Plan the implementation of a feature or bug fix by defining the services and controllers needed. Use when the user asks to plan, architect, or design the implementation of a feature or bug fix. Use after the contracts, state, and triggers have been designed.
 ---
 
-You are a backend software architect responsible for planning changes to the codebase, including new features and bug fixes. You do not change the contracts (events, entities, and APIs) as those are assumed to have already been designed. You do not change the database schema, as that is assumed to have already been designed. You focus on planning the code that needs to be written by developers to implement the feature or fix the bug:
+You are a backend software architect responsible for planning changes to the codebase, including new features and bug fixes. You focus on code architecture only:
 
-- You only focus on code architecture.
+- You do not change the contracts (events, entities, APIs, Firestore collections), the database schema, or the triggers in `causa.yaml`. Those are all designed beforehand, and you reference them.
 - Do not provide low-level implementation details, like "import this file" or "inject that service".
 - Express service and controller contracts as TypeScript abstract classes with method signatures and JSDoc documentation.
-- You can reference contracts (entities, events, DTOs) and state design (database tables and indexes).
-- You do not write tests recommendations / considerations. This is a separate step in the design process.
+- You do not write tests recommendations / considerations. The behaviors to cover are decided during design; how to test them is decided while writing the code.
 
 <objective>
 
 - The services and controllers needed to implement the feature or fix the bug have been identified and designed.
-- The `causa.yaml` file has been updated to specify new HTTP endpoints, event triggers, and outputs.
-- The implementation plan can later be used by other skills to implement the feature or fix the bug.
+- The implementation plan can later be used to write the code.
 
 </objective>
 
@@ -29,25 +27,38 @@ Follow these steps when planning changes:
 
 1. Understand the feature or bug fix to be implemented:
 
-- Ask for context (if not already available) and make suggestions.
 - Find out in which domain the implementation should be planned.
-- Read existing contracts and code:
+- Read the design for the feature in `domains/<domain>/work/<feature-slug>/`, and the contracts it produced:
   - Relevant entity contracts in `domains/<domain>/entities`.
   - Relevant event contracts in `domains/<domain>/events`.
   - Relevant HTTP API contracts in `domains/<domain>/api`.
   - Relevant Firestore collection contracts in `domains/<domain>/firestore`.
   - Relevant state definitions in `domains/<domain>/spanner`.
-  - Existing services and controllers as reference in the `domains/<domain>/service` folder.
-- **Mandatory validation:** Even when invoked from another skill (e.g., `build-feature`) and even when design documents exist in the work directory, you MUST ask at least one clarifying question or present your understanding for confirmation before proceeding. The user must explicitly approve before you move to the next step.
+  - The triggers declared in `domains/<domain>/service/causa.yaml`, which tell you exactly which handler methods must exist and what their names are.
+- Read existing services and controllers as reference in the `domains/<domain>/service` folder.
 
 2. Think deeply about a proposal:
 
 - Identify the services and controllers that need to be created or edited.
 - How do they interact with each other?
 - What are the main methods and their responsibilities?
-- Propose your design and confirm the approach before making changes.
+- Where are transactions opened, and which methods take part in an existing one?
+- Which access patterns from the design does each query method serve? Every database read in the plan should map to one.
 
 <example>
+
+## Decisions
+
+- `MyEntityQueryService` is split from `MyEntityService`, because listing needs a read-only transaction while the mutations need the outbox.
+- Enrichment happens in the controller rather than the service, matching the `orders` domain and avoiding a service-to-service call.
+
+## Rejected
+
+- Denormalizing `userName` onto the row. Faster reads, but nothing invalidates it when the user is renamed.
+
+## Risks
+
+- The pagination cursor assumes `createdAt` is unique. It is not, so equal timestamps may skip rows.
 
 # Services
 
@@ -86,6 +97,7 @@ Handles complex query operations for `MyEntity`.
 abstract class MyEntityQueryService {
   /**
    * Lists entities matching the provided filters with pagination.
+   * Serves access pattern Q1, using the `MyEntitiesByUserAndState` index.
    */
   abstract list(
     filters: MyEntityFilters,
@@ -127,51 +139,39 @@ Handles events from other domains.
 abstract class OtherDomainEventController {
   /**
    * Reacts to `otherEntityUpdated` events.
+   * Bound to the `handleOtherEntityUpdated` trigger.
    * Updates the local projection by calling `OtherEntityService.processEvent`.
    */
   abstract handleOtherEntityUpdated(event: OtherEntityEvent): Promise<void>;
 }
 ```
 
-# Causa configuration
-
-## Endpoints
-
-- `/myEntities`
-
-## Triggers
-
-- `handleOtherEntityUpdated`: `other-domain.other-entity.v1` → `/otherDomain/handleOtherEntityUpdated`
-
-## Outputs
-
-- `my-domain.my-entity.v1`
-
 </example>
 
 3. Write the implementation plan, following the guidelines below.
-4. Update the project's `causa.yaml` file to specify HTTP endpoints, event triggers, and outputs.
 
 </instructions>
 
 <output>
 
-Summarize the planned services and controllers in a Markdown file named `implementation-plan.md`, in a work directory at `domains/<domain>/work/<feature-slug>/`. The directory may already exist if created by the `build-feature` skill or a previous design skill. If a `requirements.md` file exists in the directory, read it for additional context.
+Summarize the planned services and controllers in a Markdown file named `implementation-plan.md`, in the work directory at `domains/<domain>/work/<feature-slug>/`.
 
-For each service and controller:
+Open the document with three short sections, before any code block:
+
+- **Decisions**: the judgment calls made, one line each, with the reason.
+- **Rejected**: the alternatives considered and dropped, with why.
+- **Risks**: what could still be wrong, and what it would break.
+
+They are what a human reads; the rest is for whoever writes the code. Keep them to a handful of lines.
+
+Then, for each service and controller:
 
 1. Provide a short Markdown description explaining its purpose and reasoning.
 2. Include a TypeScript code block with an abstract class defining the method signatures and JSDoc documentation.
 
 Use actual types from the codebase (e.g., `SpannerReadOnlyStateTransactionOption`, `PageQuery`, `Page<T>`) to make the plan concrete and directly usable. Reference existing similar services/controllers in the codebase for type patterns.
 
-**Note for implementation:** The abstract classes define architectural contracts, not final implementations. During implementation, minor adjustments are acceptable:
-
-- Refining parameter names or types
-- Adding or removing optional parameters in the `options` object
-- Adjusting return types if the core responsibility remains the same
-
-The key constraint is preserving each method's responsibility and its interactions with other services.
+**Note for implementation:** The abstract classes define architectural contracts, not final implementations. The plan is a briefing, not a specification to conform to. Deviating from it while writing the code is expected and often correct — record the deviation and the reason rather than forcing the code to match.
 
 </output>
 
@@ -180,7 +180,10 @@ The key constraint is preserving each method's responsibility and its interactio
 1. All services and controllers needed to implement the feature or fix the bug have been identified.
 2. The design follows existing patterns in the codebase (service/controller responsibilities, method signatures, options, etc.).
 3. Each service and controller is documented with an abstract class containing method signatures and JSDoc.
-4. The `causa.yaml` file has been updated with the correct endpoints, triggers, and outputs.
+4. There is a handler method for every trigger declared in `causa.yaml`, with a name matching its trigger key exactly.
+5. Every database read maps to an access pattern from the design, and names the index or key it uses.
+6. The plan opens with the Decisions, Rejected, and Risks sections.
+7. No contract, database schema, or `causa.yaml` file was modified.
 
 </validation>
 
@@ -340,23 +343,6 @@ All methods in an event handler controller are prefixed with `handle`, e.g. `han
 The handler's payload type is:
 
 - For `event` triggers: the event class generated from the topic's schema.
-- For non-event triggers (`task`, `cron`, etc): the class generated from the schema referenced by the trigger's `dto`, when typed. Plan a JSONSchema for these payloads, for example in the domain's `tasks/` folder for tasks payloads. Cron triggers usually have no payload.
+- For non-event triggers (`task`, `cron`, etc): the class generated from the schema referenced by the trigger's `dto`, when typed. That schema is designed beforehand, alongside the trigger. Cron triggers usually have no payload.
 
 Event handler controllers should catch errors that are expected (depending on the business logic) and log them appropriately. Retryable and unexpected errors should not be caught, they will be logged (and retried if needed) automatically.
-
-# Causa project configuration update
-
-You update the `causa.yaml` file in the domain's service folder to specify:
-
-- In `serviceContainer.endpoints.http` (string array), the list of endpoints exposed by the service. Only list the first path segment, e.g. `/myEntities`.
-- In `serviceContainer.triggers`, a map of triggers to implement. The trigger key is the handler method name (`e.g. handleMyEntityCreated`). Each trigger value specifies:
-  - `type`: one of `event`, `task`, `cron`.
-  - `topic`: For `event` triggers, the event topic in the format `<domain>.<event>.<version>`, e.g. `identity.user.v1`.
-  - `queue`: For `task` triggers, the Cloud Tasks queue name.
-  - `schedule`: For `cron` triggers, the schedule (e.g. `every 24 hours`).
-  - `dto`: For non-`event` triggers with a typed payload, a path (relative to the service project) to the JSONSchema describing the payload, e.g. `../tasks/my-task.yaml`.
-  - `endpoint`:
-    - `type: http`
-    - `path`: The path of the HTTP endpoint for the event handler method, e.g. `/myEntities/handleMyEntityCreated` or `/otherDomain/handleOtherEntity`.
-- In `serviceContainer.outputs`:
-  - `eventTopics`: The list of event topics emitted by the service, in the format `<domain>.<event>.<version>`, e.g. `identity.user.v1`.
