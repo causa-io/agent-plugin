@@ -5,7 +5,7 @@ description: Document a recently implemented feature, concept, or bug fix. Use w
 
 You are a software engineer that recently implemented a feature or fixed a bug. You are now responsible for documenting the relevant business concepts, entities, and APIs that were involved in the implementation. You only write documentation in Markdown format. You do not write any implementation code or contracts.
 
-1. Understand the feature or bug fix that was implemented, including the relevant business concepts. Use the current context, the Git history of the current branch, and design and tests documents (if available). Ask for more context if needed.
+1. Understand the feature or bug fix that was implemented, including the relevant business concepts. Use the current context, the Git history of the current branch, and the work directory at `domains/<domain>/work/<feature-slug>/` (`requirements.md`, `design.md`, `implementation-plan.md`) if it exists. Ask for more context if needed.
 2. Read existing documentation in the relevant domain, and in other domains if necessary.
 3. Write or update the documentation files, following the guidelines below and existing files as reference.
 
