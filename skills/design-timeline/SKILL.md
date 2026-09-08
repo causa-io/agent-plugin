@@ -1,41 +1,26 @@
 ---
 name: design-timeline
-description: Design timelines that visualize events from several sources (service logs and event topics) correlated on one time axis. Use when the user wants to monitor a scenario's runs or observe/debug an environment (including production). Designs the sources conversationally, then writes a timeline YAML file.
+description: Reference for authoring timelines that visualize events from several sources (service logs and event topics) correlated on one time axis. Use when monitoring a scenario's runs or observing/debugging an environment, including production, and load it before writing any timeline file. Covers source types, filters, display templates, and conventions.
 ---
 
-You are a software engineer who designs **timelines**: observability views that query several sources — service logs and event topics — over a shared time window and render them as time-ordered lanes, so related records from different systems can be read together. A timeline is a YAML file listing the sources to query and how each is filtered, colored, and displayed. The environment and time window are chosen at view time, so the **file itself is environment-agnostic**.
-
-This skill has two parts:
-
-1. **Design** the timeline — identify the use case, the sources to query, and how to filter/display each, then confirm with the user.
-2. **Write** the timeline as a valid, idiomatic YAML file.
+A **timeline** is an observability view: it queries several sources — service logs and event topics — over a shared time window and renders them as time-ordered lanes, so related records from different systems can be read together. A timeline is a YAML file listing the sources to query and how each is filtered, colored, and displayed. The environment and time window are chosen at view time, so the **file itself is environment-agnostic**.
 
 There are two common use cases, which differ in how sources are chosen and parameterized:
 
 - **Monitor a scenario's runs.** A companion to a `design-scenario` scenario, querying the same topics and services the scenario exercises (typically against a development/QA environment). Usually **static** (no inputs).
 - **Observe or debug an environment** (including production). Sources cover a subsystem of interest, usually **parameterized** with an input (e.g. an entity or user id) so the view can be scoped to one subject.
 
-<objective>
-
-- The use case is clear, and the set of sources to query has been confirmed with the user.
-- Each source has an accurate filter and display (title, body, color) built from the real record shape.
-- The timeline is written as a valid YAML file that loads in the Causa Studio.
-
-</objective>
-
 <instructions>
-
-# Part 1 — Design the timeline
 
 ## 1. Determine the use case
 
-Decide whether this is a **scenario-monitoring** timeline or an **environment-observability** timeline. If it is not clear from the request, ask.
+Decide whether this is a **scenario-monitoring** timeline or an **environment-observability** timeline.
 
 ## 2. Gather context
 
-- **For a scenario-monitoring timeline:** read the corresponding scenario (the `design-scenario` skill and the scenario YAML file). Identify every source the scenario exercises — each **event topic** it queries (`EventTopicQueryEvents` `topic`) or asserts, and each **service container** behind its HTTP calls and log queries (`ServiceContainerQueryLogs` `service`). These become the timeline's sources.
+- **For a scenario-monitoring timeline:** read the corresponding scenario YAML file. Identify every source the scenario exercises — each **event topic** it queries (`EventTopicQueryEvents` `topic`) or asserts, and each **service container** behind its HTTP calls and log queries (`ServiceContainerQueryLogs` `service`). These become the timeline's sources.
 - **For an environment-observability timeline:** identify the subsystem to observe — which event topics and service containers matter — and the dimension to filter on (an entity/user id), which becomes an input.
-- **For both:** read the relevant **event schemas** (designed by `design-model`, in `domains/<domain>/events/`) to know the exact `data` shape, and confirm the **service log structure** so the display templates reference real fields. Look at existing timelines for established style.
+- **For both:** read the relevant **event schemas** (in `domains/<domain>/events/`) to know the exact `data` shape, and confirm the **service log structure** so the display templates reference real fields. Look at existing timelines for established style.
 - Find where timelines live (see `<output>`).
 
 ## 3. Design the sources
@@ -44,11 +29,11 @@ For each source decide: `type` (`serviceLogs` or `eventTopic`), `target` (contai
 
 - **Title** and **color** are the fields you shape most: a short, scannable one-line title; a color templated to the field you want to correlate across lanes (or in some cases a fixed color per source).
 - **Body** is usually the whole event (`{ $eval: data }`); declutter only when a payload is noisy (e.g. service logs).
-- Add **inputs** only for observe/debug timelines (filterable dimensions); keep scenario-monitoring timelines static unless the user asks otherwise.
+- Add **inputs** only for observe/debug timelines (filterable dimensions); keep scenario-monitoring timelines static unless asked otherwise.
 
-Present the designed sources conversationally — the use case, the source set, and the key filters/titles. Do **not** write a separate design document. **You must confirm the design with the user before writing** (ask at least one clarifying question), even when the use case seems obvious.
+Do not write a separate design document.
 
-# Part 2 — Write the timeline
+## 4. Write the timeline
 
 Work top-down: `name`/`description`, declare `inputs` (debug only), then each source. Always write a `description` (Markdown): a one-line summary of the flow, a short list of the sources (each with its title emoji), and a closing line stating what the color scheme encodes. It lets a reader grasp the view at a glance.
 
@@ -82,7 +67,7 @@ The `$schema` value is a path relative to the timeline file — adjust the numbe
 3. Every `filter` references only `input('<name>')` (never record fields — filters render before the query), and each referenced input is declared. `serviceLogs` filters use Cloud Logging syntax; `eventTopic` filters use a BigQuery `WHERE` expression.
 4. Every `title`, `body`, and `color` references only record fields (`serviceLogs` → `message`; `eventTopic` → `attributes`/`data`) — never `input()`.
 5. Topic ids, service ids, and field paths match the actual contracts and environment (cross-checked against event schemas and log structure).
-6. For a scenario-monitoring timeline: the sources cover the topics and services the scenario exercises, the file is co-located with and named after the scenario, and it declares no inputs unless the user asked for them.
+6. For a scenario-monitoring timeline: the sources cover the topics and services the scenario exercises, the file is co-located with and named after the scenario, and it declares no inputs unless they were asked for.
 7. json-e is well-formed: bare `${ ... }` only interpolates scalars; arrays/objects use the object form `{ $eval: ... }` (e.g. a whole-event body).
 
 </validation>

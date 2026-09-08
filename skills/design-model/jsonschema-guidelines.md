@@ -11,6 +11,7 @@
 - Use `additionalProperties: false` for objects, unless there is a specific reason not to.
 - When creating a new schema, make all properties `required` unless there is a specific reason not to.
 - When updating an existing schema, add properties as optional (not in `required`), unless introducing a breaking change is explicitly authorized in the current context.
+- Apply that convention silently. Do not copy explanatory comments in the examples: the examples annotate it for you, real schemas do not.
 - Store nested or reusable schemas under `$defs`. These should also follow the naming conventions, i.e. `PascalCase` for both the schema name and the title.
 - To reference a nested or reusable schema:
   - For a non-array property, always use `$ref` inside a `oneOf`. Never use `$ref` directly in a property. Include a `type: null` in the `oneOf` only if necessary.
