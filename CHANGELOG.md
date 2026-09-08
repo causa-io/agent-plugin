@@ -5,9 +5,21 @@
 Breaking changes:
 
 - Rename the plugin from `skills` to `causa`, so its skills are namespaced as `causa:<skill>`.
+- Restructure delivery into two stages, each ending in a single human gate on complete, already-reviewed work: design (clarify, design every contract, review, fix), then implementation (plan, code, document, review, fix). `build-feature` now orchestrates both and writes the contracts itself, rather than invoking a gated design skill per artifact.
+- Turn the design skills into pure knowledge references: `design-model`, `design-api-http`, `design-api-firestore`, `design-state`, `design-scenario`, and `design-timeline` lose their personas, `<objective>` blocks, questioning steps, and confirmation gates, and their `<output>` sections now describe the artifacts on disk rather than a work-directory document. Gates belong to whoever is talking to the human.
+- Replace the per-skill design documents with a single `design.md`, written by `build-feature`.
+- Move access patterns, indexes, triggers, and the whole of `causa.yaml` into the design stage. `plan-implementation` no longer writes `causa.yaml` and is limited to code architecture.
+- Replace `plan-tests`' test skeletons with a list of the behaviors to cover, derived from the contracts and written during design. How a behavior is tested is now decided while writing the code.
 
 Features:
 
+- Define the `review-design` and `review-implementation` skills: adversarial reviewers that always run as subagents, ground every finding in cited evidence and a concrete failure scenario, and must attempt to refute each finding before reporting it.
+- Define the `improve-skills` skill, which turns the review findings, deviations, and human feedback that were kept into minimal skill deltas, and routes repository-specific lessons to the repository's own memory instead of discarding them. It stops at a self-contained `skill-feedback.md`, leaving the edits to an agent working in the plugin's own repository.
+- Define the `design-triggers` skill, covering the events a service consumes, the tasks it enqueues, and the crons it runs. It is independent of `design-model`: a new topic needs no consumer, and a trigger on another domain's topic needs no contract.
+- Add access patterns to `design-state`, listing every way the feature reads data — including the lookups from event handlers, crons, and internal logic that are invisible from the API contracts — so that indexes are justified by a query rather than guessed.
+- Add a bundled question inventory to `build-feature`, asked in two waves — scope first, then only the surfaces in scope — with an assumption ledger in `requirements.md` for everything not asked.
+- Record deviations from the implementation plan in `implement`, each with whether the plan could have anticipated it. The plan is a briefing, not a specification.
+- Add a `feedback.md` journal, appended to by `build-feature` and `implement` as corrections happen, so `improve-skills` reads a log instead of reconstructing one.
 - Add validation checklists to the `bump-version` and `document` skills.
 - Add a Spanner DDL example to the `design-state` skill, and document the table name override, row deletion policies, and interleaved tables.
 
