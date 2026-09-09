@@ -1,11 +1,15 @@
 ---
 name: design-scenario
 description: Reference for authoring end-to-end test scenarios as YAML files run against a development environment. Use when writing or updating a scenario that probes a real environment — calling HTTP APIs, querying databases, generating tokens, inspecting published events and service logs — and load it before writing any scenario file. Covers when a scenario is warranted, the call functions, the template language, and expectations.
+license: ISC
+compatibility: Requires a checked-out Causa monorepo and git.
 ---
 
 A scenario is a YAML file that probes a real (development) environment: it calls HTTP APIs, queries databases, generates tokens, and inspects published events and service logs, then asserts on the results.
 
 This reference covers deciding whether a scenario is warranted, designing the flow, and writing the file. Timelines that visualize a scenario's runs are covered by `design-timeline`.
+
+**Bundled files.** `./` paths are in this skill's own directory, not the working directory.
 
 <instructions>
 
@@ -53,7 +57,7 @@ Write one YAML file per scenario, **one at a time**. For each scenario, follow t
 
 <output>
 
-Write one YAML file per scenario, named after the scenario (e.g. `<slug>.yaml`). Determine the directory scenarios live in from the Causa configuration (the `scenario.globs` in `causa.yaml`); fall back to the project documentation (e.g. `CLAUDE.md`), and if it is still unclear, ask the user. Do not assume a path.
+Write one YAML file per scenario, named after the scenario (e.g. `<slug>.yaml`). Determine the directory scenarios live in from the Causa configuration (the `scenario.globs` in `causa.yaml`); fall back to the repository's agent instructions (`AGENTS.md`, `CLAUDE.md`, or whichever equivalent the repository uses) and its documentation, and if it is still unclear, ask the user. Do not assume a path.
 
 Start each file with the schema reference comment so editors validate it:
 
@@ -81,9 +85,9 @@ The `$schema` value is a path relative to the scenario file — adjust the numbe
 
 ## Example scenario
 
-See `${CLAUDE_SKILL_DIR}/example.yaml` for a complete, annotated example: a user updates their profile via the HTTP API, then the scenario asserts the change landed in Spanner, was logged by the service, and was published as an event. It illustrates authentication, threading a value forward, and retrying on asynchronously-produced results. Read it before writing a new scenario.
+See `./example.yaml` for a complete, annotated example: a user updates their profile via the HTTP API, then the scenario asserts the change landed in Spanner, was logged by the service, and was published as an event. It illustrates authentication, threading a value forward, and retrying on asynchronously-produced results. Read it before writing a new scenario.
 
-See `${CLAUDE_SKILL_DIR}/example-reusable.yaml` for the `ScenarioRun`, cleanup, and `rand('uuid')` patterns.
+See `./example-reusable.yaml` for the `ScenarioRun`, cleanup, and `rand('uuid')` patterns.
 
 ## How a scenario runs
 

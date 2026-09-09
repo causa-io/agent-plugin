@@ -1,6 +1,6 @@
 # Causa skills
 
-A Claude Code plugin providing engineering skills to design, implement, document, and release features built on the [Causa](https://github.com/causa-io) framework.
+Engineering skills to design, implement, document, and release features built on the [Causa](https://github.com/causa-io) framework.
 
 ## Skills
 
@@ -17,8 +17,8 @@ Delivery runs in **two stages**, each ending in a single gate where the human se
 | `plan-tests` | reference | The behaviors a feature must have covered, derived from its contracts. |
 | `plan-implementation` | reference | Services and controllers, as abstract classes. |
 | `implement` | action | Write the code and tests, and record what departed from the plan. |
-| `review-design` | subagent | Adversarially review the design before any code is written. |
-| `review-implementation` | subagent | Adversarially review the code, tests, and documentation. |
+| `review-design` | review | Adversarially review the design before any code is written. |
+| `review-implementation` | review | Adversarially review the code, tests, and documentation. |
 | `document` | action | Document the implemented feature. |
 | `design-scenario` | reference | End-to-end test scenarios, for large or cross-domain features. |
 | `design-timeline` | reference | Visualize events from several sources (service logs, event topics) on one time axis. |
@@ -27,15 +27,15 @@ Delivery runs in **two stages**, each ending in a single gate where the human se
 
 The **reference** skills are knowledge, not workflow: they carry the conventions for one kind of artifact and are loaded on demand, by `build-feature` or directly. They hold no confirmation gates — the gates belong to whoever is talking to the human.
 
-The **review** skills always run as subagents, receiving paths only.
+The **review** skills always run in a context that does not hold the author's rationale, receiving paths only. A subagent is the preferred mechanism where one exists; a fresh session given the same paths works too. A reviewer that inherits the author's context defends the work instead of challenging it.
 
 The skills assume a Causa monorepo laid out under `domains/<domain>/` (entities, events, api, firestore, spanner, tasks, service, doc). Work in progress is written to `domains/<domain>/work/<feature-slug>/`.
 
 ## Usage
 
-### CLI
+### Claude Code
 
-Add the marketplace and install the plugin from within Claude Code:
+Add the marketplace and install the plugin:
 
 ```
 /plugin marketplace add causa-io/agent-plugin
@@ -44,9 +44,7 @@ Add the marketplace and install the plugin from within Claude Code:
 
 Then invoke a skill, e.g. `/build-feature`, or just describe the task and let Claude pick the relevant skill.
 
-### Project `.claude/settings.json`
-
-To enable the plugin for everyone working in a project, commit it to the project's `.claude/settings.json`:
+To enable the plugin for everyone working in a project, commit this to the project's `.claude/settings.json`:
 
 ```json
 {
@@ -66,10 +64,14 @@ To enable the plugin for everyone working in a project, commit it to the project
 
 Claude Code installs and enables the plugin automatically when the project is opened.
 
-### Updating
+After the skills change upstream, refresh with `/plugin marketplace update causa`.
 
-After the skills change upstream, refresh it to pull the latest:
+### Other agents
 
-```
-/plugin marketplace update causa
+Codex, Cursor, and opencode all read skills from `~/.agents/skills`, and from `.agents/skills` within a project, so installing once covers them. Symlinked skill folders are followed:
+
+```bash
+git clone https://github.com/causa-io/agent-plugin.git ~/src/causa-agent-plugin
+mkdir -p ~/.agents/skills
+ln -s ~/src/causa-agent-plugin/skills/* ~/.agents/skills/
 ```

@@ -1,11 +1,15 @@
 ---
 name: design-api-firestore
 description: Reference for designing Firestore collections and security rules for real-time data access. Use when designing, creating, or updating Firestore collections, documents, or security rules for a business domain, and load it before writing any Firestore document schema or rule. Covers collection paths, redaction, and the collections declared in `causa.yaml`.
+license: ISC
+compatibility: Requires a checked-out Causa monorepo, git, Node.js with npm, and the Causa CLI (cs).
 ---
 
 Firestore collections are views of entities, asynchronously replicated from entity events. They provide real-time subscriptions for frontends.
 
 This reference covers Firestore document schemas, their security rules, and the `outputs.google.firestore` declaration that goes with them. Base entities and events are covered by `design-model` — they may be referenced here, but not defined here. Request/response APIs are covered by `design-api-http`.
+
+**Bundled files.** `./` paths are in this skill's own directory, not the working directory.
 
 <instructions>
 
@@ -13,8 +17,8 @@ To design or update Firestore collections:
 
 1. Read existing Firestore collections in the relevant domain, and in other domains if necessary. Read the entity schemas that will be projected as Firestore documents.
 2. Identify the document schemas and security rules that need to be created or updated: which entities need real-time access, which properties are exposed or redacted, who can read them, and whether the collection is root-level or nested.
-3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
-4. Read the example Firestore document schema in `${CLAUDE_SKILL_DIR}/firestore-document-example.yaml`.
+3. Learn the global JSONSchema guidelines in `./jsonschema-guidelines.md`.
+4. Read the example Firestore document schema in `./firestore-document-example.yaml`.
 5. Write or update the Firestore document schemas and security rules, following the guidelines below and existing files as reference.
 6. List the root collections written by the service in `serviceContainer.outputs.google.firestore`, in `domains/<domain>/service/causa.yaml`.
 
@@ -118,7 +122,7 @@ causa:
 
 ## Example
 
-Read `${CLAUDE_SKILL_DIR}/firestore-document-example.yaml` for an example of a Firestore document schema.
+Read `./firestore-document-example.yaml` for an example of a Firestore document schema.
 
 # Security rules
 

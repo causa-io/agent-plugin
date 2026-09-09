@@ -1,6 +1,8 @@
 ---
 name: improve-skills
 description: Collect the review findings, deviations, and human feedback that were actually kept in a finished feature, and write up the skill changes they call for. Use when the user asks to run a retrospective, learn from the feedback on a feature, or improve the skills themselves. Use at the very end of a feature or bug fix, once the design and implementation are final. Produces a proposal document; it does not edit any skill.
+license: ISC
+compatibility: Requires a checked-out Causa monorepo and git.
 ---
 
 You are responsible for closing the loop between what a feature actually needed and what the skills told the agent to do. Every correction a reviewer or a human had to make is a place where a skill was silent, wrong, or too easy to skip. Your job is to find the corrections that survived into the final result, and to write up the changes the generalizable ones call for.
@@ -20,6 +22,8 @@ Proposing no change is a valid and frequent outcome. A skill edited on the stren
 - `skill-feedback.md` has been written, and stands on its own for an agent that has none of this context.
 
 </objective>
+
+**Bundled files.** `./` paths are in this skill's own directory, not the working directory.
 
 <instructions>
 
@@ -69,7 +73,7 @@ Rejections are as informative as acceptances, and they are the only defense a re
 
 For each generalizable lesson, search the other skills for the concepts involved, and read the sections around any hit.
 
-The skills sit next to this one: `${CLAUDE_SKILL_DIR}/..` is the plugin's `skills/` directory, whatever path the harness installed it under. Grep from there — `${CLAUDE_SKILL_DIR}/../*/SKILL.md` — rather than guessing an install location. If that variable does not resolve, ask the user where the plugin's skills are, and do not guess.
+The other skills sit next to this one: `../` is the plugin's `skills/` directory, wherever it is installed. Grep from there — `../*/SKILL.md` — rather than guessing an install location. If you cannot determine where this file lives, ask the user where the plugin's skills are, and do not guess.
 
 - **The guidance already exists** → the skill did not fail on content, it failed on discovery. Do not add a second bullet saying the same thing; two phrasings of one rule contradict each other eventually. Propose instead: move it to a more visible section, add it to the skill's `<validation>` list so it is checked rather than merely stated, or replace the abstract statement with the concrete example from this feature. Record which you chose and why.
 - **The guidance does not exist** → propose a new bullet in the most specific existing section. Create a new section only when no existing one fits.
@@ -88,7 +92,7 @@ The skills sit next to this one: `${CLAUDE_SKILL_DIR}/..` is the plugin's `skill
 | The wrong skill was loaded, or the right one was not | The `description` frontmatter of that skill |
 | The artifact was fine, but the next step lacked the context to use it | The `<output>` section of the producing skill |
 | The steps were followed and the outcome was still wrong | The `<validation>` section of the skill that produced it |
-| A rule binds this repository only | The repository's `CLAUDE.md`, a domain `CLAUDE.md`, or the domain documentation |
+| A rule binds this repository only | The repository's agent instructions — `AGENTS.md`, `CLAUDE.md`, or whichever equivalent it already uses, at the root or in the domain — or the domain documentation. Match the file the repository already has; do not introduce a second convention |
 
 ## 8. Write the document
 
@@ -127,7 +131,7 @@ Repository-specific lessons may additionally be applied in the repository being 
 | --- | --- | --- | --- | --- | --- |
 | 1 | A list query on a user-owned entity must carry the ownership filter | `orders.service.ts:91` gained `AND userId = @userId` | generalizable | `plan-implementation` | addition |
 | 2 | Per-property assertions are fine on single-field DTOs | rejected twice, here and in `work/order-refunds` | suppression | `review-implementation` | suppression |
-| 3 | Discounts are capped at 30% in this domain | `order.yaml:36` has `maximum: 0.3` | repository | `domains/orders/CLAUDE.md` | note |
+| 3 | Discounts are capped at 30% in this domain | `order.yaml:36` has `maximum: 0.3` | repository | `domains/orders/AGENTS.md` | note |
 | 4 | Splitting `create` for the stock reservation | deviation D1, "could the plan have known? No" | — | none | none — only visible once the code existed |
 
 ## 1. A list query on a user-owned entity must carry the ownership filter

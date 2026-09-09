@@ -1,11 +1,15 @@
 ---
 name: design-api-http
 description: Reference for designing HTTP APIs using OpenAPI. Use when designing, creating, or updating HTTP APIs, REST endpoints, DTOs, or API contracts for a business domain, and load it before writing any OpenAPI or DTO file. Covers CRUD conventions, error responses, and the endpoints declared in `causa.yaml`.
+license: ISC
+compatibility: Requires a checked-out Causa monorepo, git, Node.js with npm, and the Causa CLI (cs).
 ---
 
 Business domains expose an HTTP API, defined using one or several OpenAPI YAML files. Each file focuses on a single entity or feature of the domain.
 
 This reference covers OpenAPI contracts, the DTOs they reference, and the `endpoints.http` declaration that goes with them. Base entities and events are covered by `design-model` — they may be referenced here, but not defined here. Real-time read access for frontends is covered by `design-api-firestore`.
+
+**Bundled files.** `./` paths are in this skill's own directory, not the working directory.
 
 <instructions>
 
@@ -13,8 +17,8 @@ To design or update HTTP APIs:
 
 1. Read existing HTTP API files in the relevant domain, and in other domains if necessary. They are the ground truth for conventions.
 2. Identify the OpenAPI contracts and the DTOs (JSONSchema) that need to be created or updated: the commands and mutation operations, the query operations, who can access each of them, and the business errors each can return.
-3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`. Those should be used for DTOs.
-4. Read the example OpenAPI file in `${CLAUDE_SKILL_DIR}/api-example.yaml`.
+3. Learn the global JSONSchema guidelines in `./jsonschema-guidelines.md`. Those should be used for DTOs.
+4. Read the example OpenAPI file in `./api-example.yaml`.
 5. Write or update the HTTP API files and DTOs, following the guidelines below and existing files as reference.
 6. List the endpoints exposed by the service in `serviceContainer.endpoints.http`, in `domains/<domain>/service/causa.yaml`. Only the first path segment is listed, e.g. `/myEntities`.
 
@@ -132,4 +136,4 @@ Follow these guidelines when choosing the response code for an error:
 
 ## Example
 
-Read `${CLAUDE_SKILL_DIR}/api-example.yaml` for an example of an OpenAPI file. Read `${CLAUDE_SKILL_DIR}/entity-example.yaml` for an example of a DTO file.
+Read `./api-example.yaml` for an example of an OpenAPI file. Read `./entity-example.yaml` for an example of a DTO file.

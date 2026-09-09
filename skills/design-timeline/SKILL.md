@@ -1,6 +1,8 @@
 ---
 name: design-timeline
 description: Reference for authoring timelines that visualize events from several sources (service logs and event topics) correlated on one time axis. Use when monitoring a scenario's runs or observing/debugging an environment, including production, and load it before writing any timeline file. Covers source types, filters, display templates, and conventions.
+license: ISC
+compatibility: Requires a checked-out Causa monorepo and git.
 ---
 
 A **timeline** is an observability view: it queries several sources — service logs and event topics — over a shared time window and renders them as time-ordered lanes, so related records from different systems can be read together. A timeline is a YAML file listing the sources to query and how each is filtered, colored, and displayed. The environment and time window are chosen at view time, so the **file itself is environment-agnostic**.
@@ -9,6 +11,8 @@ There are two common use cases, which differ in how sources are chosen and param
 
 - **Monitor a scenario's runs.** A companion to a `design-scenario` scenario, querying the same topics and services the scenario exercises (typically against a development/QA environment). Usually **static** (no inputs).
 - **Observe or debug an environment** (including production). Sources cover a subsystem of interest, usually **parameterized** with an input (e.g. an entity or user id) so the view can be scoped to one subject.
+
+**Bundled files.** `./` paths are in this skill's own directory, not the working directory.
 
 <instructions>
 
@@ -45,7 +49,7 @@ Re-read the file and run it through the `<validation>` checklist.
 
 <output>
 
-Write one YAML file per timeline. Determine the directory timelines live in from the Causa configuration (the `timeline.globs` in `causa.yaml`); fall back to the project documentation (e.g. `CLAUDE.md`), and if it is still unclear, ask the user. Do not assume a path.
+Write one YAML file per timeline. Determine the directory timelines live in from the Causa configuration (the `timeline.globs` in `causa.yaml`); fall back to the repository's agent instructions (`AGENTS.md`, `CLAUDE.md`, or whichever equivalent the repository uses) and its documentation, and if it is still unclear, ask the user. Do not assume a path.
 
 - **Scenario-monitoring timeline:** co-locate it next to the scenario file, while reusing existing naming conventions and allowed globs.
 - **Environment-observability timeline:** name it after what it observes.
@@ -76,7 +80,7 @@ The `$schema` value is a path relative to the timeline file — adjust the numbe
 
 ## Example timeline
 
-See `${CLAUDE_SKILL_DIR}/example.timeline.yaml` for a complete, annotated example: a debug timeline that follows one order across two `serviceLogs` sources and one `eventTopic` source, illustrating the two template contexts, optional input-scoped filters, the three color conventions (status range, fixed per source, event name), emoji titles, and both body styles (whole event vs. decluttered log). Read it before writing a new timeline.
+See `./example.timeline.yaml` for a complete, annotated example: a debug timeline that follows one order across two `serviceLogs` sources and one `eventTopic` source, illustrating the two template contexts, optional input-scoped filters, the three color conventions (status range, fixed per source, event name), emoji titles, and both body styles (whole event vs. decluttered log). Read it before writing a new timeline.
 
 ## How a timeline renders
 

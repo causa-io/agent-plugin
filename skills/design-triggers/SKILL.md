@@ -1,6 +1,8 @@
 ---
 name: design-triggers
 description: Reference for designing a service's inbound work — the events it consumes, the tasks it enqueues, and the crons it runs — declared as triggers in `causa.yaml`. Use when a service needs to react to an event from any domain, run scheduled work, or process a queued task, and load it before adding or changing a trigger. Covers trigger types, event name filters, handler naming, and task payload schemas.
+license: ISC
+compatibility: Requires a checked-out Causa monorepo, git, Node.js with npm, and the Causa CLI (cs).
 ---
 
 Everything a service does that is not an HTTP request from a client arrives through a **trigger**: an event published on a topic, a task pulled from a queue, or a schedule firing. Triggers are declared in `serviceContainer.triggers` in `domains/<domain>/service/causa.yaml`, and each one is bound to a handler method by name.
@@ -9,6 +11,8 @@ This reference covers the consumer side of events, plus tasks and crons. It is i
 
 - A topic designed by `design-model` needs no consumer. Events are published for consumers that may live in another domain, in an external system, or that do not exist yet.
 - A trigger often consumes a topic **from another domain**, which involves no contract change at all. `design-model` is not needed in that case.
+
+**Bundled files.** `./` paths are in this skill's own directory, not the working directory.
 
 <instructions>
 
@@ -20,7 +24,7 @@ To design or update triggers:
    - Is there work that must run later, at a time the caller chooses? That is a task.
    - Is there work that must run on a schedule — expiry, reconciliation, cleanup? That is a cron.
 3. For each trigger, decide whether the handler needs only a subset of a topic's event names, and write the corresponding filter.
-4. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
+4. Learn the global JSONSchema guidelines in `./jsonschema-guidelines.md`.
 5. For each task trigger, design its payload as a JSONSchema in `domains/<domain>/tasks/<name>.yaml`, following those guidelines. Cron triggers usually have no payload; event triggers are typed from the topic's event schema.
 6. Write the triggers into `causa.yaml`, following the guidelines below.
 7. Note, for each trigger, what the handler will look up when it fires. Those are access patterns, and they belong in the access patterns table covered by `design-state`. Handler and cron lookups are the ones most often missed there, because they are invisible from the API contracts.

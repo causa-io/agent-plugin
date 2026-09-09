@@ -1,6 +1,8 @@
 ---
 name: design-model
 description: Reference for designing entity and event schemas. Use when designing, creating, or updating entities, events, or data models for a business domain, and load it before writing any entity or event contract. Covers JSONSchema conventions, state machines, constraints, and the emitted topics declared in `causa.yaml`.
+license: ISC
+compatibility: Requires a checked-out Causa monorepo, git, Node.js with npm, and the Causa CLI (cs).
 ---
 
 Entities and events are the contracts a business domain publishes:
@@ -10,14 +12,16 @@ Entities and events are the contracts a business domain publishes:
 
 This reference covers those two contracts and the `outputs.eventTopics` declaration that goes with them. HTTP API contracts are covered by `design-api-http`. Consuming an event — a trigger on a topic, whether it belongs to this domain or another — is covered by `design-triggers`, and is independent of this reference: a topic designed here needs no consumer.
 
+**Bundled files.** `./` paths are in this skill's own directory, not the working directory.
+
 <instructions>
 
 To design or update entity and event contracts:
 
 1. Read existing contracts in the relevant domain, and in other domains if necessary. They are the ground truth for conventions.
 2. Identify the entities and events that need to be created or updated. Determine whether they have a state machine, what its states and transitions are, and which changes are triggered by other events or by user commands.
-3. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
-4. Read the example entity and event schemas in `${CLAUDE_SKILL_DIR}/entity-example.yaml` and `${CLAUDE_SKILL_DIR}/event-example.yaml`.
+3. Learn the global JSONSchema guidelines in `./jsonschema-guidelines.md`.
+4. Read the example entity and event schemas in `./entity-example.yaml` and `./event-example.yaml`.
 5. Write or update the contracts, following the guidelines below, the global JSONSchema guidelines, the examples, and existing contracts as reference.
 6. Add every topic the domain emits to `serviceContainer.outputs.eventTopics` in `domains/<domain>/service/causa.yaml`, in the format `<domain>.<event>.<version>`.
 
@@ -111,7 +115,7 @@ For an entity that defines a core business concept, you may define possible stat
 
 ## Example
 
-Read `${CLAUDE_SKILL_DIR}/entity-example.yaml` for an example of an entity schema.
+Read `./entity-example.yaml` for an example of an entity schema.
 
 # Event schemas
 
@@ -140,6 +144,6 @@ Constraints follow the same guidelines as entity constraints. In addition, if th
 
 ## Example
 
-Read `${CLAUDE_SKILL_DIR}/event-example.yaml` for an example of an event schema.
+Read `./event-example.yaml` for an example of an event schema.
 
 Use the exact types provided in the example. Use the exact description for `id`, `producedAt`, and `name`. Match the description of the `data` property to the entity being referenced.

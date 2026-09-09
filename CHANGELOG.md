@@ -13,7 +13,7 @@ Breaking changes:
 
 Features:
 
-- Define the `review-design` and `review-implementation` skills: adversarial reviewers that always run as subagents, ground every finding in cited evidence and a concrete failure scenario, and must attempt to refute each finding before reporting it.
+- Define the `review-design` and `review-implementation` skills: adversarial reviewers that always run in a context holding none of the author's rationale, ground every finding in cited evidence and a concrete failure scenario, and must attempt to refute each finding before reporting it.
 - Define the `improve-skills` skill, which turns the review findings, deviations, and human feedback that were kept into minimal skill deltas, and routes repository-specific lessons to the repository's own memory instead of discarding them. It stops at a self-contained `skill-feedback.md`, leaving the edits to an agent working in the plugin's own repository.
 - Define the `design-triggers` skill, covering the events a service consumes, the tasks it enqueues, and the crons it runs. It is independent of `design-model`: a new topic needs no consumer, and a trigger on another domain's topic needs no contract.
 - Add access patterns to `design-state`, listing every way the feature reads data — including the lookups from event handlers, crons, and internal logic that are invisible from the API contracts — so that indexes are justified by a query rather than guessed.
@@ -22,12 +22,12 @@ Features:
 - Add a `feedback.md` journal, appended to by `build-feature` and `implement` as corrections happen, so `improve-skills` reads a log instead of reconstructing one.
 - Add validation checklists to the `bump-version` and `document` skills.
 - Add a Spanner DDL example to the `design-state` skill, and document the table name override, row deletion policies, and interleaved tables.
+- Make the skills portable across harnesses, by conforming to the [Agent Skills](https://agentskills.io) open standard rather than to Claude Code's extensions.
 
 Fixes:
 
 - Correct the `errorCode` property description in the `design-api-http` skill, which duplicated the `statusCode` one.
 - Pass `--no-git-tag-version` to `npm version` in the `bump-version` skill, so it no longer creates a commit and tag that conflict with the following step.
-- Reference bundled skill files with `${CLAUDE_SKILL_DIR}` instead of relative paths, which did not resolve from the working directory.
 - Declare the JSONSchema examples as draft 2020-12, the first draft to define the `$defs` keyword they use.
 - Add the missing usage triggers to the `implement` and `plan-tests` descriptions.
 - Fix a typo in the `design-scenario` skill.
@@ -37,7 +37,7 @@ Fixes:
 
 Chores:
 
-- Complete the plugin and marketplace manifests, and add a license, a `.gitignore`, and a validation workflow.
+- Complete the plugin and marketplace manifests and add a license.
 
 ## v1.1.0 (2026-06-24)
 
