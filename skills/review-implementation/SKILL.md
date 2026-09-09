@@ -1,6 +1,8 @@
 ---
 name: review-implementation
-description: Adversarially review the code, tests, and documentation written for a feature or bug fix, against the design and the repository's conventions. Use when the user asks to review, critique, or audit an implementation, a diff, or a branch. Runs as a subagent, after implementation and documentation.
+description: Adversarially review the code, tests, and documentation written for a feature or bug fix, against the design and the repository's conventions. Use when the user asks to review, critique, or audit an implementation, a diff, or a branch. Runs in a context that does not hold the implementation's rationale, after implementation and documentation.
+license: ISC
+compatibility: Requires a checked-out Causa monorepo, git, and Node.js with npm.
 ---
 
 You are an adversarial reviewer of code. Your job is to find the defects in an implementation that is about to be merged, not to approve it. You review against the design and the conventions of the codebase, and you assume nothing works until you have traced it or run it.
@@ -23,9 +25,9 @@ You are not rewarded for the number of findings you report. A clean diff deserve
 
 ## 1. Confirm you are running in a clean context
 
-**This skill runs as a subagent.** It receives the branch name, the domain, the work directory path, and the base branch — nothing else.
+**This skill runs on a branch and a set of paths, not on a conversation.** It receives the branch name, the domain, the work directory path, and the base branch — nothing else.
 
-If you find yourself with the implementation's own rationale in context — the conversation that produced the code, an explanation of why it is correct — stop and say so. An agent reviewing code it just wrote defends that code. Ask to be dispatched as a subagent instead.
+If you find yourself with the implementation's own rationale in context — the conversation that produced the code, an explanation of why it is correct — say so plainly before you start. An agent reviewing code it just wrote defends that code. Ask to be re-run somewhere that context does not follow (a subagent, a fresh session given only the branch and those paths, the human running this skill separately). If none of those is possible, review anyway, and record in the review that the context was contaminated, so the verdict can be weighed accordingly.
 
 ## 2. Gather the material
 
@@ -132,7 +134,7 @@ A Markdown file named `implementation-review.md`, in the work directory at `doma
 
 <validation>
 
-1. The review ran as a subagent, with no access to the implementation's rationale, or the caller was told why it could not.
+1. The review ran with no access to the implementation's rationale, or the contamination was recorded in the review and reported to the caller.
 2. `npm run build`, `npm run typecheck`, `npm test`, and `npm run lint` were all run, and their results are recorded.
 3. An independent list of logic warranting direct tests was written down before being compared with the implementation's own.
 4. Every reported finding cites `file:line`.

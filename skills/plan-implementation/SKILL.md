@@ -1,6 +1,8 @@
 ---
 name: plan-implementation
 description: Plan the implementation of a feature or bug fix by defining the services and controllers needed. Use when the user asks to plan, architect, or design the implementation of a feature or bug fix. Use after the contracts, state, and triggers have been designed.
+license: ISC
+compatibility: Requires a checked-out Causa monorepo and git.
 ---
 
 You are a backend software architect responsible for planning changes to the codebase, including new features and bug fixes. You focus on code architecture only:

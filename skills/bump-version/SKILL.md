@@ -1,6 +1,8 @@
 ---
 name: bump-version
 description: Bump the service version (including its active version) and update the changelog following a feature or bug fix. Use when the user asks to bump, release, or version a service, or to update the changelog and deploy a new version.
+license: ISC
+compatibility: Requires a checked-out Causa monorepo, git, and Node.js with npm.
 ---
 
 1. Understand the feature or bug fix that was implemented, either from previous context or the changes on the current Git branch. Understand if the changes break backward compatibility. Ask for more context if needed.

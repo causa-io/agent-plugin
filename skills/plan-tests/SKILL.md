@@ -1,6 +1,8 @@
 ---
 name: plan-tests
 description: List the behaviors a feature or bug fix must have covered by tests, derived from its contracts. Use when the user asks which tests are needed, or to plan or design the test coverage for a feature or bug fix. Use during design, once the contracts exist, and before writing any code.
+license: ISC
+compatibility: Requires a checked-out Causa monorepo and git.
 ---
 
 You are a software engineer responsible for deciding **what** must be covered by tests, not how to test it. You derive that list from what the feature is specified to do — its contracts, its requirements, and the third-party behavior it must handle — so that coverage is driven by what the feature promises, not by what the code happens to do.

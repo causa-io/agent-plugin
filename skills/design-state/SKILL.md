@@ -1,6 +1,8 @@
 ---
 name: design-state
 description: Reference for designing access patterns, state objects, and Spanner database schemas. Use when designing database tables, Spanner schemas, indexes, query patterns, or storage for a business domain, and load it before writing any state schema or DDL file. Covers access patterns, indexes, row deletion policies, and the databases declared in `causa.yaml`.
+license: ISC
+compatibility: Requires a checked-out Causa monorepo, git, Node.js with npm, and the Causa CLI (cs).
 ---
 
 The state of a domain is what its service persists and how it reads it back: the entities stored in Spanner, the private state and projections alongside them, the access patterns the service needs, and the indexes that serve those patterns.
@@ -13,6 +15,8 @@ This reference covers all of the above and the `outputs.google.spanner` declarat
 - Firestore collections are defined in `domains/<domain>/firestore/<name>.yaml` (covered by `design-api-firestore`).
 - Triggers, which are a major source of access patterns, are covered by `design-triggers`.
 
+**Bundled files.** `./` paths are in this skill's own directory, not the working directory.
+
 <instructions>
 
 To design or update access patterns, state, and database schemas:
@@ -20,8 +24,8 @@ To design or update access patterns, state, and database schemas:
 1. Read the relevant contracts and APIs. Read existing state definitions and database schemas in the relevant domain, ensuring you will only add what is necessary compared to what already exists.
 2. Enumerate the access patterns the feature needs, following the "Access patterns" section below. This comes before indexes: an index is only justified by a pattern.
 3. Identify whether additional internal state (beyond entities) is needed, and whether views on entities from other domains are needed.
-4. Learn the global JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
-5. Read the example DDL file in `${CLAUDE_SKILL_DIR}/spanner-ddl-example.sql`.
+4. Learn the global JSONSchema guidelines in `./jsonschema-guidelines.md`.
+5. Read the example DDL file in `./spanner-ddl-example.sql`.
 6. Write or update the state object JSONSchema definitions (if any), following the guidelines below.
 7. Create new database schema files for domain entities and private state management, with the indexes the access patterns require, following the guidelines below.
 8. List the databases written by the service in `serviceContainer.outputs.google.spanner`, in `domains/<domain>/service/causa.yaml`, in the format `<instance>.<database>`, e.g. `backend.content`.
@@ -104,7 +108,7 @@ If you find that some additional state (not present in the entities stored in th
 - Additional private information about each entity instance (not present in the entity contract).
 - State related to processing of events and third-party API synchronization.
 
-For each state object, you write its JSONSchema definition to `domains/<domain>/spanner/<name>.yaml` by following the JSONSchema guidelines in `${CLAUDE_SKILL_DIR}/jsonschema-guidelines.md`.
+For each state object, you write its JSONSchema definition to `domains/<domain>/spanner/<name>.yaml` by following the JSONSchema guidelines in `./jsonschema-guidelines.md`.
 
 ## Views on entities from other domains
 
@@ -148,4 +152,4 @@ All state objects identified in the previous section need to be created in the d
 
 ## Example
 
-Read `${CLAUDE_SKILL_DIR}/spanner-ddl-example.sql` for an example of a DDL file, creating the table for the `MyEntity` entity along with an index.
+Read `./spanner-ddl-example.sql` for an example of a DDL file, creating the table for the `MyEntity` entity along with an index.
