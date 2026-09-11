@@ -70,7 +70,7 @@ One line per behavior, phrased as an observable outcome. No code, no test file n
 
 <validation>
 
-1. Every error response declared in the HTTP API contracts has a line.
+1. Every error response the change adds or alters has a line, ones that already existed and still behave the same do not.
 2. Every entity state transition has a line, including the event it emits.
 3. Every operation has an authentication line, and an authorization line where roles or ownership apply.
 4. Every trigger has a line for its successful path, and a line for its behavior on a duplicate delivery.
@@ -97,6 +97,7 @@ Two kinds of behavior:
 - **How** a behavior will be tested: fixtures, file names, mocking, structure. That is decided when the code is written.
 - Logic whose existence and shape are not known until the code is written. A helper that turns out to need a dozen branches deserves direct tests, but nobody could have listed it here. That call belongs to whoever writes the code, and is audited during review.
 - Coverage of code paths that no contract and no requirement asks for.
+- **Behavior that already works and is not changing.** A feature that adds a property to an existing operation does not re-list that operation's authentication, its `404`, or its happy path. List what the change adds, alters, or breaks. Where a reader would expect to see something that is genuinely unaffected, name it under a short "deliberately not covered" heading, so an omission reads as a decision rather than a gap.
 
 ## Level
 

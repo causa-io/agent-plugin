@@ -165,6 +165,7 @@ The design ran with little human input, so the guesses it made are the first thi
 - Is every assumption in `requirements.md` explicit and numbered?
 - Which assumptions would **change a contract** if they turned out to be wrong, rather than a line of code? Say so for each; those are what the human must check at the gate, because they are the ones that are expensive to correct later.
 - Did the design fill a gap that is not recorded as an assumption? That is a finding.
+- For every claim about a third-party API that a design branch depends on, ask how it was established, and treat these as different answers. Accept a citation to the provider's documentation for the exact shape in question, or a check made with the request the service actually sends. Anything else is an inference, and the design should say so rather than assert it. A claim that hardens across review rounds without new evidence is a finding in itself.
 - Does every behavior in `requirements.md` have a home in one of the artifacts?
 - Does any artifact introduce behavior that no requirement asked for?
 - For a bug fix: does the design address the cause, or the symptom described in the ticket?
