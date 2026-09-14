@@ -52,7 +52,7 @@ Follow these steps when implementing a feature or bug fix:
 
 - Write the code and tests needed, covering the behaviors the design listed.
 - Do not proactively add extra features or tests beyond what was designed.
-- Closely follow existing patterns in the codebase. Before writing a new service method, type, etc., look for an existing equivalent and either reuse it or match its shape and signature.
+- Closely follow existing patterns in the codebase. Before writing a new service method, type, etc., look for an existing equivalent and reuse it. When the equivalent is a private helper of a sibling class, move it to a shared module / file and use it from both. Copy only its shape and signature when the logic genuinely differs.
 - Follow the guidelines below.
 
 5. Record what you changed your mind about:
@@ -109,7 +109,7 @@ When a work directory exists: the `## Deviations` and `## Direct tests` sections
 6. Every departure from the plan is recorded under `## Deviations`, with whether the plan could have anticipated it.
 7. No contract, database schema, or `causa.yaml` file was modified.
 8. Every user correction made during the session was appended to `feedback.md`.
-9. New code reuses an existing equivalent where the repository has one, or matches its shape.
+9. New code reuses an existing equivalent where the repository has one, or matches its shape when the logic differs.
 
 </validation>
 
@@ -214,8 +214,9 @@ this.logger.info("Starting process.");
 this.logger.info({ userId }, "User created.");
 ```
 
-## Transactions
+## Transactions and entities
 
+- On create, pass every nullable entity property explicitly, as `null` when it has no value yet. `VersionedEntityManager.create` publishes only the properties it receives: an omitted one is `undefined` in the event.
 - Most service methods should accept an optional `options` argument with an optional `transaction` property. Special option types are available for this: `SpannerOutboxTransactionOption` (read / write) and `SpannerReadOnlyStateTransactionOption` (read-only).
 - Never use an optional transaction directly, e.g. `options.transaction!.set()`. Use `SpannerOutboxTransactionRunner.run(options, (transaction) => { ... })` instead.
 - If there is a single call to a repository/database in a service method, you can pass the optional transaction directly to it.
@@ -231,6 +232,10 @@ this.logger.info({ userId }, "User created.");
 - Use `this.logger.assign({ entityId })` as early as possible to enrich logs with context.
 - Use the `@TryMap` decorator to map business errors from services to HTTP response DTOs.
 - Use `throwHttpErrorResponse` if you need to throw an HTTP error directly from the controller.
+
+## Payloads from other services
+
+- Parse a response received from another service (or a third party with a generated model) with `parseObject(GeneratedClass, payload, { forbidNonWhitelisted: false })`. The generated class validates the shape and revives dates. The option tolerates properties the producer adds.
 
 ## SQL
 
@@ -284,7 +289,7 @@ for await (const batch of batches) {
 ## Tests
 
 - `expect<Entity>Event` utilities test both the entity mutation and the published event. Do not write separate tests or additional entity assertions.
-- In read operations tests where there is no entity mutation, use `serializeAsJavaScriptObject` from `@causa/runtime/testing` to compare an entity from the database with a corresponding DTO returned by the HTTP call.
+- Use `serializeAsJavaScriptObject` from `@causa/runtime/testing` wherever a test needs the JSON form of an entity (e.g. to compare an entity from the database with the DTO an HTTP call returned).
 - If it is expected that the service logs errors during a test case, use the `LoggingFixture` to assert those logs, otherwise the test will fail.
 - `AppFixture` only needs to declare topics for events that are emitted as part of the tests.
 - Keep `it.each` arguments to simple values, or at worst a synchronous lambda returning existing fixtures. Complex arguments are a smell: simplify them, or split the cases into separate tests. The same goes for simple `it.each` values that then require complex test setup within the test body. A self-explanatory argument needs no label: drop the label tuple and give the block one fixed name. Because the arguments should be simple in the first place, this is the usual case.
@@ -311,6 +316,7 @@ Record each of these under `## Direct tests` in the implementation plan, with th
 ### Grouping and scope
 
 - When several cases differ only in setup and expect the same outcome, group them with `it.each`: basic input validation errors, or the same authorization failure for different roles.
+- Parameterize only over values a rule depends on. An `it.each` over every state, role, or type for an operation that has no rule on that axis asserts a rule that does not exist. One case is enough.
 - Keep the number of successful-operation tests small. An entity mutation and its published event are verified together, in one test.
 
 ### File naming

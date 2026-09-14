@@ -42,7 +42,7 @@ Between waves, analyze the answers and think about implications, edge cases, and
 
 Read existing contracts (entities, events, APIs) in the relevant domains to understand the current state. Do not read implementation code at this stage.
 
-For bug fixes, focus on: what the current incorrect behavior is, what the expected behavior is, and whether it is a contract, state, or implementation issue.
+For bug fixes, focus on: what the current incorrect behavior is, what the expected behavior is, and whether it is a contract, state, or implementation issue. Reproduce the incorrect behavior first. A bug reported by a previous session or asserted from memory is a hypothesis until reproduced.
 
 ## 2. Assess scope
 
