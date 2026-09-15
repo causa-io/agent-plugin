@@ -292,6 +292,7 @@ for await (const batch of batches) {
 - Use `serializeAsJavaScriptObject` from `@causa/runtime/testing` wherever a test needs the JSON form of an entity (e.g. to compare an entity from the database with the DTO an HTTP call returned).
 - If it is expected that the service logs errors during a test case, use the `LoggingFixture` to assert those logs, otherwise the test will fail.
 - `AppFixture` only needs to declare topics for events that are emitted as part of the tests.
+- To simulate a concurrent delivery or a race, put the concurrent write inside the mock of the external call the handler awaits (`mockImplementationOnce` on the provider client), so the service's own guards run for real.
 - Keep `it.each` arguments to simple values, or at worst a synchronous lambda returning existing fixtures. Complex arguments are a smell: simplify them, or split the cases into separate tests. The same goes for simple `it.each` values that then require complex test setup within the test body. A self-explanatory argument needs no label: drop the label tuple and give the block one fixed name. Because the arguments should be simple in the first place, this is the usual case.
 - For event controllers, only retryable errors are expected to return a `503` status code. All other responses should be `200` to acknowledge the event. (The logging fixture should be used to assert logged non-retryable errors.)
 - Prefer testing full objects instead of piling up multiple expectations on individual properties.

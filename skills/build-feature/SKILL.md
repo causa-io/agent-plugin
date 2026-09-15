@@ -111,7 +111,7 @@ Not every feature needs all of them.
 
 Write `design.md` in the work directory. One document, one section per artifact type, covering only what the feature touches:
 
-- What was designed and why, linking to the files on disk.
+- What was designed and why, linking to the files on disk. This is the only place the reasoning lives: a contract's `description` says what a thing means, not why it is shaped that way.
 - The access patterns table.
 - The behaviors to cover.
 
