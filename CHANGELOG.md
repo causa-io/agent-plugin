@@ -1,5 +1,14 @@
 # 🔖 Changelog
 
+## Unreleased
+
+Features:
+
+- Require claims about third parties and platform mechanisms to be verified, bug fixes to start from a reproduction, and the design's reasoning to stay in `design.md` rather than in contract descriptions.
+- Add design guidelines on DTO validation decorators, uniqueness checks without `UNIQUE` indexes, projection-owned state, and unsupported `format` values.
+- Add implementation and test guidelines to `implement`, and matching lenses to the review skills, covering transactions, interleaved tables, and test arrangement.
+- Keep the skills project-agnostic: `improve-skills` proposes edits stated in generic terms.
+
 ## v2.0.0 (2026-09-11)
 
 Breaking changes:
