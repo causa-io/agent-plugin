@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v2.1.0 (2026-09-17)
+
 Features:
 
 - Require claims about third parties and platform mechanisms to be verified, bug fixes to start from a reproduction, and the design's reasoning to stay in `design.md` rather than in contract descriptions.
