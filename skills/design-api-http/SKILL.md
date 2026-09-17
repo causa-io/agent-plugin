@@ -111,6 +111,8 @@ OpenAPI files should not define any DTO schemas directly. All schemas must be de
 
 Think of possible business errors that can occur for each operation and specify them in the operation's `responses`. Look for common response DTOs in the `domains/common/api` folder. If the response requires a specific error schema, define it in a separate DTO file.
 
+A check on a single field (a format, a numeric range, etc.) is input validation, expressed on the DTO, and returns the framework's validation error. It gets a dedicated error DTO only when a client must tell it apart from other `400`s. The generator enforces `format: uuid` and `format: date-time` but not `minimum`/`maximum` or any other `format`.
+
 ### Schema
 
 Error responses usually include the following fields:

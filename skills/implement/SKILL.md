@@ -218,6 +218,7 @@ this.logger.info({ userId }, "User created.");
 
 - On create, pass every nullable entity property explicitly, as `null` when it has no value yet. `VersionedEntityManager.create` publishes only the properties it receives: an omitted one is `undefined` in the event.
 - Most service methods should accept an optional `options` argument with an optional `transaction` property. Special option types are available for this: `SpannerOutboxTransactionOption` (read / write) and `SpannerReadOnlyStateTransactionOption` (read-only).
+- A `VersionedEntityManager` whose table has interleaved children overrides `updateState`. The default `transaction.set` is a Spanner `Replace`, which deletes the interleaved rows on every write of the parent. When the children are state of their own, call `entityManager.update(…, { upsert: true })` instead. When they are derived from the parent (e.g. index rows), keep the `Replace` and rewrite them in the same override, so parent and children are written atomically.
 - Never use an optional transaction directly, e.g. `options.transaction!.set()`. Use `SpannerOutboxTransactionRunner.run(options, (transaction) => { ... })` instead.
 - If there is a single call to a repository/database in a service method, you can pass the optional transaction directly to it.
 - If there is more than one, the method opens its own transaction with `SpannerOutboxTransactionRunner.run(options, …)` and passes it to each call. Delegating to two methods that each accept `options` is two calls: without a shared transaction they read at different timestamps.
@@ -292,7 +293,9 @@ for await (const batch of batches) {
 - Use `serializeAsJavaScriptObject` from `@causa/runtime/testing` wherever a test needs the JSON form of an entity (e.g. to compare an entity from the database with the DTO an HTTP call returned).
 - If it is expected that the service logs errors during a test case, use the `LoggingFixture` to assert those logs, otherwise the test will fail.
 - `AppFixture` only needs to declare topics for events that are emitted as part of the tests.
-- To simulate a concurrent delivery or a race, put the concurrent write inside the mock of the external call the handler awaits (`mockImplementationOnce` on the provider client), so the service's own guards run for real.
+- To simulate a concurrent delivery or a race, run one delivery and put the concurrent write inside the mock of the call between the pre-transaction check and the transaction (`mockImplementationOnce` on the provider client or the query the handler awaits), so the service's own guards run for real.
+- Helpers shared by several specs live in `utils.test.ts` next to them.
+- Arrange with the entity manager and the generated `make*` helpers rather than by calling another service: a service in the arrange step is under test too. Call one only when the state is much harder to recreate by hand.
 - Keep `it.each` arguments to simple values, or at worst a synchronous lambda returning existing fixtures. Complex arguments are a smell: simplify them, or split the cases into separate tests. The same goes for simple `it.each` values that then require complex test setup within the test body. A self-explanatory argument needs no label: drop the label tuple and give the block one fixed name. Because the arguments should be simple in the first place, this is the usual case.
 - For event controllers, only retryable errors are expected to return a `503` status code. All other responses should be `200` to acknowledge the event. (The logging fixture should be used to assert logged non-retryable errors.)
 - Prefer testing full objects instead of piling up multiple expectations on individual properties.
@@ -316,7 +319,7 @@ Record each of these under `## Direct tests` in the implementation plan, with th
 
 ### Grouping and scope
 
-- When several cases differ only in setup and expect the same outcome, group them with `it.each`: basic input validation errors, or the same authorization failure for different roles.
+- When several inputs must each produce the same rejection (invalid values, forbidden roles), group them with `it.each`. When the cases are members of one input (rows of a batch), write one test whose input contains every kind of member and assert the whole result.
 - Parameterize only over values a rule depends on. An `it.each` over every state, role, or type for an operation that has no rule on that axis asserts a rule that does not exist. One case is enough.
 - Keep the number of successful-operation tests small. An entity mutation and its published event are verified together, in one test.
 

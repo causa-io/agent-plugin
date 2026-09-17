@@ -200,6 +200,7 @@ This lens is why the design stage owns indexes: the queries are known here, so t
 - Is every access pattern listed, including the ones that come from triggers, crons, and internal logic rather than from an endpoint? Those are the ones that get missed.
 - Does every pattern have an index whose prefix matches its filter and ordering, or a primary key prefix that already covers it? Name the index or key for each.
 - Is any index defined that no pattern justifies?
+- Does a new pattern restate the filters of a read path the domain already runs? The pattern should name the existing query it extends and the options it adds.
 - Are the volume estimates present, and do they make sense? A pattern returning an unbounded number of rows needs batching, and the design should say so.
 - Does every entity property that must be persisted map to a column, with a compatible type and nullability?
 - Are interleaving and primary key choices consistent with the access patterns, and with the existing tables of the domain?
@@ -210,6 +211,7 @@ This lens is why the design stage owns indexes: the queries are known here, so t
 - Does every `event` trigger reference an existing topic?
 - Does every event name in a `google.pubSub.filter` exist in that topic's event name enum? A filter on a name that does not exist silently stops delivering.
 - Is a trigger declared that nothing in the requirements asks for — added merely to give a new topic a consumer?
+- Is a new `event` trigger declared on a topic the service already projects? If the handler maintains state keyed by the projected entity, ask why it is not the projection's handler. An ordering or never-resurrect rule written for it is evidence the projection's version gate was bypassed.
 - Does every task trigger have a queue and a payload schema? Does every cron have a schedule?
 - Is each handler's lookup listed as an access pattern?
 - What happens when the same event is delivered twice? The design should answer this per trigger.
