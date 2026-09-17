@@ -192,6 +192,7 @@ The plan is a briefing, not a specification. Code that departs from it is not a 
 ## Correctness
 
 - Transactions: is every entity mutation and its event emission in the same outbox transaction? Is an optional transaction ever used directly (`options.transaction!`) instead of through `SpannerOutboxTransactionRunner.run`?
+- Interleaving: does a manager whose table has `INTERLEAVE IN PARENT` children override `updateState`? The default write is a `Replace`, and every parent update silently deletes the children, unless the override rewrites them because they derive from the parent.
 - Idempotency: what happens on a second delivery of the same event? Name the outcome.
 - Ordering: does the code depend on events arriving in order, and can they?
 - Error paths: is every error the API contract declares actually thrown? Is every error the code throws mapped to a response?
@@ -230,7 +231,7 @@ The plan is a briefing, not a specification. Code that departs from it is not a 
 - Are read operations compared with `serializeAsJavaScriptObject`?
 - Is the `LoggingFixture` used wherever the service is expected to log an error?
 - Does `AppFixture` declare exactly the topics the tests emit on?
-- Are assertions on full objects, rather than piles of per-property expectations?
+- Are assertions on full objects, rather than piles of per-property expectations? A row read from the database is asserted with the generated `expect<Entity>` helper, using asymmetric matchers inside the expected object where needed.
 - Are the negative cases there: unauthenticated, unauthorized, not found, invalid input, conflicting state?
 - Do the tests assert behavior, or do they assert the implementation's own calls back to itself?
 

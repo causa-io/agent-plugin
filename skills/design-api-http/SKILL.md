@@ -111,6 +111,8 @@ OpenAPI files should not define any DTO schemas directly. All schemas must be de
 
 Think of possible business errors that can occur for each operation and specify them in the operation's `responses`. Look for common response DTOs in the `domains/common/api` folder. If the response requires a specific error schema, define it in a separate DTO file.
 
+A check on a single field (a format, a numeric range, etc.) is input validation, expressed on the DTO, and returns the framework's validation error. It gets a dedicated error DTO only when a client must tell it apart from other `400`s. The generator enforces `format: uuid` and `format: date-time` but not `minimum`/`maximum` or any other `format`.
+
 ### Schema
 
 Error responses usually include the following fields:
@@ -131,7 +133,7 @@ Follow these guidelines when choosing the response code for an error:
   - Business validation errors:
     - The current entity (or other) state does not allow the operation.
     - A referenced entity does not exist. (Not the main entity identified in the path, which would be 404.)
-- 403: Use forbidden for authorization errors in two cases. First, when the endpoint as a whole is closed to that user — an operation only platform admins may call, for example. It is part of the published API specification, so its existence is not a secret and 404 would not make sense. Second, when the caller may call the endpoint but not act on this resource, **and can already learn that the resource exists**: it is returned by a list operation they may call, or they are a party to it. Use 404 for a specific resource only when the caller has no other way to discover it, so that the status itself does not disclose it.
+- 403: Use forbidden for authorization errors in two cases. First, when the endpoint as a whole is closed to that user — an operation only platform admins may call, for example. It is part of the published API specification, so its existence is not a secret and 404 would not make sense. Second, when the caller may call the endpoint but not act on this resource, **and can already learn that the resource exists**: it is returned by a list operation they may call, or they are a party to it. Use 404 for a specific resource only when the caller has no other way to discover it, so that the status itself does not disclose it. A rule that rejects the request for every caller (e.g. a combination of fields the entity never accepts) is not authorization. It is 400 invalid input, and it belongs with the validation rules.
 - 409: Use for concurrency control errors, e.g. when the `updatedAt` query parameter does not match the current value of the entity. Do not use for "already exists" errors, use 400 instead.
 
 ## Example

@@ -91,6 +91,7 @@ Everything here changes which surfaces exist, and therefore which references get
 - What happens when one is slow, or down? Retry, fail the request, or degrade?
 - If a local write succeeds and the external call then fails, what state is the entity left in?
 - Are there credentials or configuration the deployment needs?
+- How was each claim about the third party established? Assumptions should rest on the provider's documentation for the exact request shape, or on a probe against the real API, never on memory. A claim from memory is an assumption to record, and one to verify before the design stage ends.
 
 ## Bug fixes
 

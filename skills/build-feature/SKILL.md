@@ -42,7 +42,7 @@ Between waves, analyze the answers and think about implications, edge cases, and
 
 Read existing contracts (entities, events, APIs) in the relevant domains to understand the current state. Do not read implementation code at this stage.
 
-For bug fixes, focus on: what the current incorrect behavior is, what the expected behavior is, and whether it is a contract, state, or implementation issue.
+For bug fixes, focus on: what the current incorrect behavior is, what the expected behavior is, and whether it is a contract, state, or implementation issue. Reproduce the incorrect behavior first. A bug reported by a previous session or asserted from memory is a hypothesis until reproduced.
 
 ## 2. Assess scope
 
@@ -111,7 +111,7 @@ Not every feature needs all of them.
 
 Write `design.md` in the work directory. One document, one section per artifact type, covering only what the feature touches:
 
-- What was designed and why, linking to the files on disk.
+- What was designed and why, linking to the files on disk. This is the only place the reasoning lives: a contract's `description` says what a thing means, not why it is shaped that way.
 - The access patterns table.
 - The behaviors to cover.
 

@@ -75,7 +75,7 @@ For each generalizable lesson, search the other skills for the concepts involved
 
 The other skills sit next to this one: `../` is the plugin's `skills/` directory, wherever it is installed. Grep from there — `../*/SKILL.md` — rather than guessing an install location. If you cannot determine where this file lives, ask the user where the plugin's skills are, and do not guess.
 
-- **The guidance already exists** → the skill did not fail on content, it failed on discovery. Do not add a second bullet saying the same thing; two phrasings of one rule contradict each other eventually. Propose instead: move it to a more visible section, add it to the skill's `<validation>` list so it is checked rather than merely stated, or replace the abstract statement with the concrete example from this feature. Record which you chose and why.
+- **The guidance already exists** → the skill did not fail on content, it failed on discovery. Do not add a second bullet saying the same thing; two phrasings of one rule contradict each other eventually. Propose instead: move it to a more visible section, add it to the skill's `<validation>` list so it is checked rather than merely stated, or replace the abstract statement with the concrete case from this feature, stated in generic terms. Record which you chose and why.
 - **The guidance does not exist** → propose a new bullet in the most specific existing section. Create a new section only when no existing one fits.
 
 ## 7. Route each lesson
@@ -105,6 +105,8 @@ For each proposed change, state precisely enough that the downstream agent does 
 - The file to edit, and the section within it.
 - The exact text to add, or the exact text to replace and what replaces it.
 - Whether anything is being removed, and the evidence that it was wrong.
+
+The evidence names this repository's files and concepts, the proposed text never does. A skill ships to every project, where an entity, domain, or business concept from this codebase means nothing and leaks the project's details. Write the generic shape the concept is an instance of (an entity, a batch, a provider), and keep the concrete case in the evidence.
 
 Then tell the user the document is ready and where it is, and that applying it happens in the plugin repository. Do not offer to make the edits.
 
@@ -157,7 +159,8 @@ Repository-specific lessons may additionally be applied in the repository being 
 7. Rejected review findings were reviewed for suppression rules.
 8. Every lesson quotes its evidence inline, so the document stands alone for a reader without access to this repository.
 9. No proposed change removes existing guidance without explicit justification and evidence.
-10. No skill file was edited.
+10. No proposed text names an entity, domain, or business concept from this repository. Those appear only in the evidence.
+11. No skill file was edited.
 
 </validation>
 

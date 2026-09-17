@@ -122,7 +122,7 @@ Database schemas are Spanner DDL statements stored in `domains/<domain>/spanner/
 - Changes are usually split into multiple files based on the table being created or modified. Several statements on a single table and its indexes can be grouped in a single file.
 - Statements should be written in Google SQL for Spanner.
 - Table and index names should be in PascalCase, matching the entity or state object name. Column names should be in camelCase, matching the property names in the JSONSchema definition.
-- Do not use foreign keys or check constraints.
+- Do not use foreign keys, check constraints, or `UNIQUE` indexes. The runtime writes through the mutation API, so a violation only surfaces at commit, where the logic that should map it to a business error no longer owns the transaction. Enforce uniqueness in the writer instead: read the plain index inside the read-write transaction before inserting, and throw the business error there.
 - Only define indexes for query patterns that are actually needed by services.
 - Do not add a trailing semicolon at the end of the file, only to separate statements.
 - Generated columns of type `STRING` must always use `STRING(MAX)`.

@@ -8,6 +8,7 @@
 - To make a property nullable, use a `oneOf` with `null` and the actual type.
 - Date-time properties should use `type: string` with `format: date-time`.
 - UUID properties should use `type: string` with `format: uuid`.
+- Do not use any other `format` (`uri`, `email`, etc.): the generator ignores them, so they promise a validation the code does not perform. State the constraint in the description.
 - Use `additionalProperties: false` for objects, unless there is a specific reason not to.
 - When creating a new schema, make all properties `required` unless there is a specific reason not to.
 - When updating an existing schema, add properties as optional (not in `required`), unless introducing a breaking change is explicitly authorized in the current context.
